@@ -1,4 +1,4 @@
 library(testthat)
-library(mmph)
+library(mmpf)
 
-test_check("mmph")
+test_check("mmpf")

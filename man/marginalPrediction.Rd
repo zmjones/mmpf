@@ -5,8 +5,8 @@
 \title{marginalizes prediction functions}
 \usage{
 marginalPrediction(data, vars, n, model, uniform = TRUE,
-  aggregate.fun = mean, predict.fun = function(object, newdata, ...)
-  predict(object, newdata = newdata, ...), ...)
+  aggregate.fun = mean, predict.fun = function(object, newdata)
+  predict(object, newdata = newdata))
 }
 \arguments{
 \item{data}{a \code{data.frame} containing the training data excluding the target column(s)}
@@ -22,8 +22,6 @@ marginalPrediction(data, vars, n, model, uniform = TRUE,
 \item{aggregate.fun}{what function to aggregate the predictions with}
 
 \item{predict.fun}{what function to generate predictions using \code{model}. default is the predict method for \code{model}.}
-
-\item{target}{a character vector of length one giving the target variable name}
 }
 \value{
 a named list with an element "prediction" which contains an array, matrix, or vector of dimension \code{n[1]}, the column dimension of the output of \code{predict.fun}, and the dimension of the output from \code{aggregate.fun}.

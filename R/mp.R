@@ -5,7 +5,6 @@
 #' 
 #' @param data a \code{data.frame} containing the training data excluding the target column(s)
 #' @param vars a character vector corresponding to columns or an integer vector giving indices
-#' @param target a character vector of length one giving the target variable name
 #' @param model an object with a predict method which returns a vector or matrix. presumably this object represents a model fit.
 #' @param n an integer vector of length two giving the resolution of the uniform or random grid on \code{vars} for the first element, and the number of the rows of the training data that are sample for the second element.
 #' @param uniform logical indicating whether to create the grid on \code{var} uniformly or to sample from the empirical distribution.
@@ -25,8 +24,8 @@
 #'
 #' @export
 marginalPrediction <- function(data, vars, n, model, uniform = TRUE,
- aggregate.fun = mean, predict.fun = function(object, newdata, ...)
-   predict(object, newdata = newdata, ...), ...) {
+ aggregate.fun = mean, predict.fun = function(object, newdata)
+   predict(object, newdata = newdata)) {
 
   stopifnot(class(data) %in% c("data.frame", "matrix"))
   ## should check to see if predict method has a newdata arg
@@ -36,7 +35,7 @@ marginalPrediction <- function(data, vars, n, model, uniform = TRUE,
     vars <- which(colnames(data) %in% vars)
   }
   design <- makeGrid(data, vars, n, uniform)
-  preds <- predict.fun(model, design, ...)
+  preds <- predict.fun(model, design)
     
   if (is.matrix(preds) || is.data.frame(preds)) {
     preds <- array(preds, c(n, ncol(preds)))
