@@ -26,17 +26,29 @@ variableGrid.numeric <- function(x, length.out) {
 
 #' @export
 variableGrid.integer <- function(x, length.out) {
-  as.integer(seq.int(min(x, na.rm = TRUE), max(x, na.rm = TRUE),
-    length.out = length.out))
+  as.integer(round(seq.int(min(x, na.rm = TRUE), max(x, na.rm = TRUE),
+    length.out = length.out), 0))
 }
 
 #' @export
 variableGrid.factor <- function(x, length.out, ...) {
-  if (is.ordered(x)) {
-    sort(unique(x))[as.integer(seq.int(1, length(unique(x)), length.out = length.out))]
+  x.length <- length(unique(x))
+  remainder <- length.out %% x.length
+  each <- floor(length.out / x.length)
+  if (length.out > x.length) {
+    if (remainder == 0) {
+      sort(rep(unique(x), times = each))
+    } else {
+      which.add <- sample(1:x.length, remainder)
+      sort(unlist(list(unique(x)[rep(1:x.length, times = each)],
+        unique(x)[which.add])))
+    }
   } else {
-    ## impossible to order selection if length.out < length(unique(x)) w/o ordering
-    sample(unique(x), size = length.out)
+    if (is.ordered(x)) {
+      unique(x)[variableGrid(seq_len(x.length), length.out)]
+    } else {
+      sort(sample(unique(x), size = length.out))
+    }
   }
 }
 
