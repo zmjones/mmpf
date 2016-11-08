@@ -33,7 +33,7 @@ marginalPrediction <- function(data, vars, n, model, uniform = TRUE,
   design <- makeGrid(data, vars, n, uniform)
   preds <- predict.fun(model, design)
     
-  if (is.matrix(preds) || is.data.frame(preds)) {
+  if (is.matrix(preds) | is.data.frame(preds)) {
     preds <- array(preds, c(n, ncol(preds)))
     mp <- apply(preds, c(1, 3), aggregate.fun)
   } else {
