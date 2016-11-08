@@ -25,7 +25,7 @@ data = data.frame(
   y = ordered(1:5),
   z = 1:5
 )
-variableGrid(data, 3)
 
+lapply(data, variableGrid, length.out = 5)
 }
 

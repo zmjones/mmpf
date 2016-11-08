@@ -4,7 +4,7 @@
 #' @importFrom stats predict
 #' 
 #' @param data a \code{data.frame} containing the training data excluding the target column(s)
-#' @param vars a character vector corresponding to columns or an integer vector giving indices
+#' @param vars a character vector corresponding to columns in \code{data}.
 #' @param model an object with a predict method which returns a vector or matrix. presumably this object represents a model fit.
 #' @param n an integer vector of length two giving the resolution of the uniform or random grid on \code{vars} for the first element, and the number of the rows of the training data that are sample for the second element.
 #' @param uniform logical indicating whether to create the grid on \code{var} uniformly or to sample from the empirical distribution.
@@ -19,7 +19,7 @@
 #' data <- data.frame(X, y)
 #' fit <- lm(y ~ -1 + X)
 #' 
-#' marginalPrediction(X, 2, c(10, 25), fit,
+#' marginalPrediction(data.frame(X), "X2", c(10, 25), fit,
 #'   aggregate.fun = function(x) c("mean" = mean(x), "variance" = var(x)))
 #'
 #' @export
@@ -27,13 +27,9 @@ marginalPrediction <- function(data, vars, n, model, uniform = TRUE,
  aggregate.fun = mean, predict.fun = function(object, newdata)
    predict(object, newdata = newdata)) {
 
-  stopifnot(class(data) %in% c("data.frame", "matrix"))
-  ## should check to see if predict method has a newdata arg
-  stopifnot(class(vars) %in% c("numeric", "integer", "character"))
-  if (is.character(vars)) {
-    stopifnot(all(vars %in% colnames(data)))
-    vars <- which(colnames(data) %in% vars)
-  }
+  stopifnot(class(data) == "data.frame")
+  stopifnot(class(vars) == "character")
+
   design <- makeGrid(data, vars, n, uniform)
   preds <- predict.fun(model, design)
     

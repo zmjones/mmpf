@@ -14,8 +14,8 @@
 #'   y = ordered(1:5),
 #'   z = 1:5
 #' )
-#' variableGrid(data, 3)
 #'
+#' lapply(data, variableGrid, length.out = 5)
 #' @export
 variableGrid <- function(x, length.out) UseMethod("variableGrid")
 
@@ -26,26 +26,26 @@ variableGrid.numeric <- function(x, length.out) {
 
 #' @export
 variableGrid.integer <- function(x, length.out) {
-  as.integer(round(seq.int(min(x, na.rm = TRUE), max(x, na.rm = TRUE),
-    length.out = length.out), 0))
+  min.x <- min(x, na.rm = TRUE)
+  max.x <- max(x, na.rm = TRUE)
+  x.length <- max.x - min.x
+  if (length.out > x.length) {
+    min.x:max.x
+  } else {
+    as.integer(round(seq.int(min.x, max.x, length.out = length.out)), 0)
+  }
 }
 
 #' @export
 variableGrid.factor <- function(x, length.out, ...) {
   x.length <- length(unique(x))
-  remainder <- length.out %% x.length
-  each <- floor(length.out / x.length)
-  if (length.out > x.length) {
-    if (remainder == 0) {
-      sort(rep(unique(x), times = each))
-    } else {
-      which.add <- sample(1:x.length, remainder)
-      sort(unique(x)[c(rep(1:x.length, times = each), which.add)])
-    }
+  if (length.out >= x.length) {
+    sort(unique(x))
   } else {
     if (is.ordered(x)) {
       unique(x)[variableGrid(seq_len(x.length), length.out)]
     } else {
+      warning("length.out is less than the number of levels")
       sort(sample(unique(x), size = length.out))
     }
   }
@@ -53,7 +53,11 @@ variableGrid.factor <- function(x, length.out, ...) {
 
 #' @export
 variableGrid.character <- function(x, length.out, ...) {
-  sample(unique(x), size = length.out)
+  x.length <- length(unique(x))
+  if (length.out < x.length) {
+    warning("length.out is less than the number of unique values")
+  }
+  sample(unique(x), size = min(length.out, x.length))
 }
 
 #' @export
@@ -89,52 +93,71 @@ cartesianExpand <- function(x, y) {
   for (j in 1:dim(y)[2]) {
     A[, dim(x)[2] + j] <- y[idy, j, drop = FALSE]
   }
+  colnames(A) <- c(colnames(x), colnames(y))
   A
 }
 #' @title make a uniform or random grid over some columns of a data.frame
 #' @description makes a uniform or random grid over some columns of a data.frame and takes their cartesian product with the other columns
 #'
 #' @param data a \code{data.frame}
-#' @param vars integer indices indicating the variables to create the grid for
+#' @param vars character vector the columns in data to create the grid for
 #' @param n two dimensional integer vector giving the resolution of the grid. the first element gives the grid on \code{vars} and the second on the other columns, which are subsampled.
 #' @param uniform logical, indicates whether a uniform or random grid is to be constructed.
-#' @return a \code{data.frame} with \code{n} dimensions.
+#' @param points a named list which gives specific points for \code{vars}.
+#' @return a \code{data.frame} with at most \code{n} dimensions.
 #'
 #' @examples
-#'
 #' data <- data.frame(w = seq(0, 1, length.out = 5),
 #'                    x = factor(letters[1:5]),
 #'                    y = ordered(1:5),
 #'                    z = 1:5,
 #'                    r = letters[1:5],
 #'                    stringsAsFactors = FALSE)
-#' makeGrid(data, 1, c(10, 5), TRUE)
+#' makeGrid(data, "z", c(10, 5), TRUE)
 #'
 #' @export
-makeGrid <- function(data, vars, n, uniform) {
+makeGrid <- function(data, vars, n, uniform = TRUE, points) {
   ## arg checks
   stopifnot(is.numeric(n) && all.equal(n, round(n, 0)) && length(n) == 2L)
   stopifnot(is.logical(uniform))
   stopifnot(class(data) %in% c("data.frame", "matrix"))
-  stopifnot(is.numeric(vars) && all.equal(round(vars, 0), vars) &&
-              max(vars) <= ncol(data) && min(vars) >= 1)
+  stopifnot(class(vars) == "character")
 
-  ## create points for grid or sample from training data
-  if (uniform) {
-    points <- variableGrid(data[, vars, drop = FALSE], n[1])
+  if (missing(points)) {
+     ## create points for grid or sample from training data
+    if (uniform) {
+      if (length(vars) > 1) {
+        ## combine individual grids
+        points <- expand.grid(sapply(vars,
+          function(x) variableGrid(data[[x]], length.out = n[1]), simplify = FALSE),
+          stringsAsFactors = FALSE)
+      } else {
+        points <- variableGrid(data[[vars]], n[1])
+        points <- as.data.frame(points, stringsAsFactors = FALSE)
+        colnames(points) <- vars
+      }
+    } else {
+      ## randomly sample points w/o replacement
+      id <- sample(1:nrow(data), n[1])
+      points <- data[id, vars]
+    }
   } else {
-    id <- sample(1:nrow(data), n[1])
-    points <- data[id, vars]
+    uniform <- FALSE
+    ## combine user specified points
+    stopifnot(all(names(points) %in% vars))
+    stopifnot(all(sapply(points, class) %in%
+                    sapply(data[, vars, drop = FALSE], class)))
+    points <- expand.grid(points, stringsAsFactors = FALSE)
   }
 
   ## subsample training data, combine
-  nvars <- seq_len(ncol(data))
-  nvars <- nvars[!nvars %in% vars]
+  nvars <- colnames(data)[!colnames(data) %in% vars]
 
+  ## combine points with sampled points
   design <- cartesianExpand(points,
-    data[sample(seq_len(nrow(data)), n[2]), -vars, drop = FALSE])
-  design <- design[, order(c(vars, nvars), seq_len(ncol(data)))]
-  colnames(design) <- colnames(data)
+    data[sample(seq_len(nrow(data)), min(n[2], nrow(data))),
+      !colnames(data) %in% vars, drop = FALSE])
+  design <- design[, colnames(data)]
 
   ## check names and classes match
   if (is.data.frame(data)) {

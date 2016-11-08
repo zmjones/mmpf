@@ -8,18 +8,20 @@ test_that("variableGrid works", {
     stringsAsFactors = FALSE)
 
   n <- 3
-  tmp <- variableGrid(data, n)
+  expect_warning(tmp <- variableGrid(data, n))
   expect_that(tmp, is_a("data.frame"))
   expect_that(sapply(data, class), equals(sapply(tmp, class)))
+  expect_that(dim(tmp), equals(c(n, 5)))
 
   tmp <- variableGrid(data$w, n)
   expect_that(tmp, is_a("numeric"))
   expect_that(range(tmp), equals(range(data$w)))
   expect_that(length(tmp), equals(n))
 
-  tmp <- variableGrid(data$x, n)
+  ## should drop n to be the number of levels
+  expect_warning(tmp <- variableGrid(data$x, n))
   expect_that(tmp, is_a("factor"))
-  expect_that(length(tmp), equals(n))
+  expect_that(length(variableGrid(data$x, 6)), equals(5))
 
   tmp <- variableGrid(data$y, n)
   expect_that(tmp, is_a("ordered"))
@@ -31,9 +33,10 @@ test_that("variableGrid works", {
   expect_that(range(tmp), equals(range(data$z)))
   expect_that(length(tmp), equals(n))
 
-  tmp <- variableGrid(data$r, n)
+  expect_warning(tmp <- variableGrid(data$r, n))
   expect_that(tmp, is_a("character"))
   expect_that(length(tmp), equals(n))
+  expect_that(length(variableGrid(data$r, 6)), equals(5))
 })
 
 test_that("cartesianExpand works", {
@@ -50,9 +53,29 @@ test_that("makeGrid works", {
     z = 1:5,
     r = letters[1:5],
     stringsAsFactors = FALSE)
-  tmp <- makeGrid(data, 1, c(10, 5), TRUE)
 
+  ## test normal case
+  tmp <- makeGrid(data, "w", c(10, 5), TRUE)
   expect_that(dim(tmp), equals(c(10 * 5, dim(data)[2])))
-  expect_that(length(unique(tmp[, 1])), equals(10))
+  expect_that(length(unique(tmp[, "w"])), equals(10))
+  expect_that(all(!is.na(tmp)), is_true())
+
+  ## test variableGrid downsizing
+  tmp <- makeGrid(data, "y", c(10, 5), TRUE)
+  expect_that(dim(tmp), equals(c(length(unique(data$y)) * 5, dim(data)[2])))
+  expect_that(length(unique(tmp[, "y"])), equals(5))
+  expect_that(all(!is.na(tmp)), is_true())
+
+  ## test points arg
+  tmp <- makeGrid(data, "r", c(NA, 5), points = list("r" = c("a", "b")))
+  expect_that(dim(tmp), equals(c(2 * 5, dim(data)[2])))
+  expect_that(length(unique(tmp[, "r"])), equals(2))
+  expect_that(all(!is.na(tmp)), is_true())
+
+  ## test multivariate case
+  tmp <- makeGrid(data, c("r", "z"), c(10, 5))
+  expect_that(dim(tmp), equals(c(5 * 5 * 5, dim(data)[2])))
+  expect_that(length(unique(tmp[, "r"])), equals(5))
+  expect_that(length(unique(tmp[, "z"])), equals(5))
   expect_that(all(!is.na(tmp)), is_true())
 })

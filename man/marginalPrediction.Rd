@@ -11,7 +11,7 @@ marginalPrediction(data, vars, n, model, uniform = TRUE,
 \arguments{
 \item{data}{a \code{data.frame} containing the training data excluding the target column(s)}
 
-\item{vars}{a character vector corresponding to columns or an integer vector giving indices}
+\item{vars}{a character vector corresponding to columns in \code{data}.}
 
 \item{n}{an integer vector of length two giving the resolution of the uniform or random grid on \code{vars} for the first element, and the number of the rows of the training data that are sample for the second element.}
 
@@ -35,7 +35,7 @@ y <- X \%*\% runif(3)
 data <- data.frame(X, y)
 fit <- lm(y ~ -1 + X)
 
-marginalPrediction(X, 2, c(10, 25), fit,
+marginalPrediction(data.frame(X), "X2", c(10, 25), fit,
   aggregate.fun = function(x) c("mean" = mean(x), "variance" = var(x)))
 
 }

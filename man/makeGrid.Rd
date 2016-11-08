@@ -4,32 +4,33 @@
 \alias{makeGrid}
 \title{make a uniform or random grid over some columns of a data.frame}
 \usage{
-makeGrid(data, vars, n, uniform)
+makeGrid(data, vars, n, uniform = TRUE, points)
 }
 \arguments{
 \item{data}{a \code{data.frame}}
 
-\item{vars}{integer indices indicating the variables to create the grid for}
+\item{vars}{character vector the columns in data to create the grid for}
 
 \item{n}{two dimensional integer vector giving the resolution of the grid. the first element gives the grid on \code{vars} and the second on the other columns, which are subsampled.}
 
 \item{uniform}{logical, indicates whether a uniform or random grid is to be constructed.}
+
+\item{points}{a named list which gives specific points for \code{vars}.}
 }
 \value{
-a \code{data.frame} with \code{n} dimensions.
+a \code{data.frame} with at most \code{n} dimensions.
 }
 \description{
 makes a uniform or random grid over some columns of a data.frame and takes their cartesian product with the other columns
 }
 \examples{
-
 data <- data.frame(w = seq(0, 1, length.out = 5),
                    x = factor(letters[1:5]),
                    y = ordered(1:5),
                    z = 1:5,
                    r = letters[1:5],
                    stringsAsFactors = FALSE)
-makeGrid(data, 1, c(10, 5), TRUE)
+makeGrid(data, "z", c(10, 5), TRUE)
 
 }
 
