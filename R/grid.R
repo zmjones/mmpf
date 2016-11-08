@@ -40,8 +40,7 @@ variableGrid.factor <- function(x, length.out, ...) {
       sort(rep(unique(x), times = each))
     } else {
       which.add <- sample(1:x.length, remainder)
-      sort(unlist(list(unique(x)[rep(1:x.length, times = each)],
-        unique(x)[which.add])))
+      sort(unique(x)[c(rep(1:x.length, times = each), which.add)])
     }
   } else {
     if (is.ordered(x)) {
