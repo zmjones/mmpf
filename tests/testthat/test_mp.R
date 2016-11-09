@@ -1,4 +1,4 @@
-test_that("mp works", {
+test_that("marginalPrediction works", {
   X <- replicate(3, rnorm(50))
   y <- X %*% runif(3)
   data <- data.frame(X, y)

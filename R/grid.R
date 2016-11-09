@@ -168,3 +168,4 @@ makeGrid <- function(data, vars, n, uniform = TRUE, points) {
 
   design
 }
+
