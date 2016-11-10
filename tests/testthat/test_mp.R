@@ -13,7 +13,7 @@ test_that("marginalPrediction works", {
   expect_that(nrow(tmp[["points"]]), equals(10))
 
   tmp <- marginalPrediction(data, c("X1", "X2"), c(10, 25), fit, TRUE, identity)
-  expect_that(dim(tmp[["prediction"]]), equals(c(10, 25)))
+  expect_that(dim(tmp[["prediction"]]), equals(c(100, 25)))
 
   tmp <- marginalPrediction(data, c("X1", "X2"), c(10, 25), fit, TRUE,
     function(x) c("mean" = mean(x), "variance" = var(x)))
