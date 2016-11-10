@@ -31,6 +31,7 @@ marginalPrediction <- function(data, vars, n, model, uniform = TRUE,
   stopifnot(class(vars) == "character")
 
   design <- makeGrid(data, vars, n, uniform)
+  n[1] <- nrow(unique(design[, vars, drop = FALSE]))
   preds <- predict.fun(model, design)
     
   if (is.matrix(preds) | is.data.frame(preds)) {
@@ -47,6 +48,6 @@ marginalPrediction <- function(data, vars, n, model, uniform = TRUE,
 
   list(
     "prediction" = mp,
-    "points" = design[1:n[1], vars, drop = FALSE]
+    "points" = unique(design[, vars, drop = FALSE])
   )
 }
