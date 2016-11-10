@@ -7,4 +7,9 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
-Suggests: testthat
+Suggests: testthat,
+    rmarkdown,
+    knitr,
+    randomForest
+BugReports: https://github.com/zmjones/mmpf
+VignetteBuilder: knitr
