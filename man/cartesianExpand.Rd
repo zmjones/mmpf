@@ -2,7 +2,7 @@
 % Please edit documentation in R/grid.R
 \name{cartesianExpand}
 \alias{cartesianExpand}
-\title{expands two data.frames using the cartesian product}
+\title{expands two data.frames using the Cartesian product}
 \usage{
 cartesianExpand(x, y)
 }

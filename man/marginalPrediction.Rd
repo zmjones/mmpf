@@ -9,21 +9,21 @@ marginalPrediction(data, vars, n, model, uniform = TRUE, points,
   predict(object, newdata = newdata))
 }
 \arguments{
-\item{data}{a \code{data.frame} containing the training data excluding the target column(s)}
+\item{data}{a \code{data.frame} which contains the columns specified by \code{vars} and at least one additional column. should correspond to the set of columns used to train the \code{model}.}
 
-\item{vars}{a character vector corresponding to columns in \code{data}.}
+\item{vars}{a character vector corresponding to a strict subset of the columns in \code{data}.}
 
-\item{n}{an integer vector of length two giving the resolution of the uniform or random grid on \code{vars} for the first element, and the number of the rows of the training data that are sample for the second element.}
+\item{n}{an integer vector of length two giving the resolution of the uniform or random grid on \code{vars} for the first element, and the number of the rows of the \code{data} to be sampled without replacement for the second element.}
 
-\item{model}{an object with a predict method which returns a vector or matrix. presumably this object represents a model fit.}
+\item{model}{an object which can be passed to \code{predict.fun} to compute predictions. presumably this object represents a model fit.}
 
-\item{uniform}{logical indicating whether to create the grid on \code{var} uniformly or to sample from the empirical distribution.}
+\item{uniform}{logical indicating whether to create the grid on \code{vars} uniformly or to sample without replacement from the empirical distribution of those \code{vars}.}
 
-\item{points}{a named list which gives specific points for \code{vars}.}
+\item{points}{a named list which gives specific points for \code{vars}. specifying this argument overrides \code{uniform}.}
 
-\item{aggregate.fun}{what function to aggregate the predictions with}
+\item{aggregate.fun}{what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{mean}.}
 
-\item{predict.fun}{what function to generate predictions using \code{model}. default is the predict method for \code{model}.}
+\item{predict.fun}{what function to generate predictions using \code{model}. default is the predict method for \code{model}. this function must have two arguments, \code{object} and \code{newdata}.}
 }
 \value{
 a named list with an element "prediction" which contains an array, matrix, or vector of dimension \code{n[1]}, the column dimension of the output of \code{predict.fun}, and the dimension of the output from \code{aggregate.fun}.
@@ -39,6 +39,5 @@ fit = lm(y ~ -1 + X)
 
 marginalPrediction(data.frame(X), "X2", c(10, 25), fit,
   aggregate.fun = function(x) c("mean" = mean(x), "variance" = var(x)))
-
 }
 

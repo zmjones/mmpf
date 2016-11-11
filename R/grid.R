@@ -1,13 +1,15 @@
-#' @title method to create an evenly spaced grid on a variable
+#' @title method to create a uniform grid on a variable
 #'
 #' @import checkmate
 #'
-#' @description generates and evenly spaced grid given an input vector or \code{data.frame} which has size \code{length.out}
+#' @description generates an evenly spaced grid given an input vector, matrix, or \code{data.frame} which has size \code{length.out}.
 #'
-#' @param x a vector or \code{data.frame} to create a grid on
-#' @param length.out an integer giving the length of the grid
+#' @param x a vector, matrix, or \code{data.frame} to create a grid on.
+#' @param length.out an integer giving the length of the grid.
 #'
-#' @return an object of the same type as \code{x}, with \code{length.out} unique values
+#' @return an object of the same type as \code{x}, with \code{length.out} or fewer unique values.
+#'
+#' @note for unordered factors and characters, if \code{length.out < length(unique(x))} \code{length.out} is set to \code{length(unique(x))}. if \code{x} is a \code{data.frame} and this is true of some columns but not others, there will be a warning.
 #' @examples
 #'
 #' data = data.frame(
@@ -76,7 +78,7 @@ uniformGrid.matrix = function(x, length.out) {
   apply(x, 2, uniformGrid, length.out = length.out)
 }
 
-#' @title expands two data.frames using the cartesian product
+#' @title expands two data.frames using the Cartesian product
 #' @description takes the cartesian product of two data.frames
 #'
 #' @import checkmate
@@ -108,15 +110,15 @@ cartesianExpand = function(x, y) {
   colnames(A) = c(colnames(x), colnames(y))
   A
 }
-#' @title make a uniform or random grid over some columns of a data.frame
-#' @description makes a uniform or random grid over some columns of a data.frame and takes their cartesian product with the other columns
+#' @title make a uniform, random, or user-specified  grid over some columns of a data.frame, and combine it with a grid of points to integrate over.
+#' @description makes a uniform, random, or user-specified grid over some columns of a data.frame and takes their Cartesian product with the other columns
 #'
 #' @import checkmate
 #'
-#' @param data a \code{data.frame}
+#' @param data a \code{data.frame} which must contain \code{vars} as well as at least one other column
 #' @param vars character vector the columns in data to create the grid for
-#' @param n two dimensional integer vector giving the resolution of the grid. the first element gives the grid on \code{vars} and the second on the other columns, which are subsampled.
-#' @param uniform logical, indicates whether a uniform or random grid is to be constructed.
+#' @param n two dimensional integer vector giving the resolution of the grid. the first element gives the grid on \code{vars} and the second on the other columns, which are sampled without replacement.
+#' @param uniform logical, indicates whether a uniform grid is to be constructed.
 #' @param points a named list which gives specific points for \code{vars}.
 #' @return a \code{data.frame} with at most \code{n} dimensions.
 #'

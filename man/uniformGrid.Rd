@@ -2,20 +2,23 @@
 % Please edit documentation in R/grid.R
 \name{uniformGrid}
 \alias{uniformGrid}
-\title{method to create an evenly spaced grid on a variable}
+\title{method to create a uniform grid on a variable}
 \usage{
 uniformGrid(x, length.out)
 }
 \arguments{
-\item{x}{a vector or \code{data.frame} to create a grid on}
+\item{x}{a vector, matrix, or \code{data.frame} to create a grid on.}
 
-\item{length.out}{an integer giving the length of the grid}
+\item{length.out}{an integer giving the length of the grid.}
 }
 \value{
-an object of the same type as \code{x}, with \code{length.out} unique values
+an object of the same type as \code{x}, with \code{length.out} or fewer unique values.
 }
 \description{
-generates and evenly spaced grid given an input vector or \code{data.frame} which has size \code{length.out}
+generates an evenly spaced grid given an input vector, matrix, or \code{data.frame} which has size \code{length.out}.
+}
+\note{
+for unordered factors and characters, if \code{length.out < length(unique(x))} \code{length.out} is set to \code{length(unique(x))}. if \code{x} is a \code{data.frame} and this is true of some columns but not others, there will be a warning.
 }
 \examples{
 

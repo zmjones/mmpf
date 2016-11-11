@@ -1,18 +1,18 @@
 #' @title computes permutation importance
-#' @description computes the change in prediction error from permuting variables
+#' @description computes the change in prediction error from permuting variables.
 #'
-#' @importFrom checkmate assertIntegerish assertDataFrame assertLogical assertList assertSubset assertFunction assertCharacter
+#' @import checkmate
 #'
-#' @param data a data.frame including the target variable
-#' @param vars a character vector specifying columns of \code{data} to permute
-#' @param y a character vector giving the name of the target/outcome variable
+#' @param data a \code{data.frame} including both \code{y} and \code{vars}.
+#' @param vars a character vector specifying columns of \code{data} to permute.
+#' @param y a character vector giving the name of the target/outcome variable.
 #' @param model an object with a predict method which returns a vector or matrix. presumably this object represents a model fit.
-#' @param nperm positive integer giving the number of times to permute the indicated variables (default 100)
-#' @param predict.fun what function to generate predictions using \code{model}. default is the predict method for \code{model}.
-#' @param loss.fun what loss function to use to measure prediction errors. default is MSE for ordered predictions and mean misclassification error for unordered prediction errors.
-#' @param contrast.fun what function to use to contrast the permuted and unpermuted predictions. default is the difference.
+#' @param nperm positive integer giving the number of times to permute the indicated variables (default is 100).
+#' @param predict.fun what function to generate predictions using \code{model}. default is the predict method for \code{model}. the function must take two arguments, \code{object} and \code{newdata} and should return a vector or matrix.
+#' @param loss.fun what loss function to use to measure prediction errors. default is mean squared-error for ordered predictions and mean misclassification error for unordered prediction errors. this function must take two arguments, \dQuote{x} and \dQuote{y}, which operate on the output of \code{predict.fun} and \code{data[, y]}.
+#' @param contrast.fun what function to use to contrast the permuted and unpermuted predictions. default is the difference. this function takes two arguments \dQuote{x} and \dQuote{y}, which are the output of the \code{loss.fun}.
 #'
-#' @return a numeric vector of length one giving the change in prediction error from \code{nperm} permutations of \code{vars}.
+#' @return a numeric vector or matrix, depending on \code{contrast.fun} and \code{loss.fun}, giving the change in prediction error from \code{nperm} permutations of \code{vars}.
 #'
 #' @examples
 #' X = replicate(3, rnorm(100))
@@ -47,16 +47,16 @@ permutationImportance = function(data, vars, y, model,
   contrast.fun(permuted, unpermuted)
 }
 
-#' @title creates a data.frame with some variables permuted
-#' @description takes an input data.frame, permutes some variables, and stacks the resulting data.frames
+#' @title creates a \code{data.frame} with some columns permuted
+#' @description takes an input data.frame, permutes some variables, and stacks the resulting \code{data.frame}s.
 #'
 #' @import checkmate
 #' 
-#' @param data a data.frame
-#' @param vars a character vector indicating columns in \code{data} to permute
-#' @param nperm an integer specifying the number of times to permute the columns indicated by \code{vars}
+#' @param data a \code{data.frame} a subset of which must be \code{vars}.
+#' @param vars a character vector indicating columns in \code{data} to permute.
+#' @param nperm an integer specifying the number of times to permute the columns indicated by \code{vars}.
 #'
-#' @return a data.frame with number of rows equal to \code{nrow(data) * nperm}
+#' @return a \code{data.frame} with number of rows equal to \code{nrow(data) * nperm}
 #'
 #' @examples
 #' data = data.frame(x = 1:3, y = letters[1:3])

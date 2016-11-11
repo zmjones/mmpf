@@ -2,18 +2,18 @@
 % Please edit documentation in R/grid.R
 \name{makeDesign}
 \alias{makeDesign}
-\title{make a uniform or random grid over some columns of a data.frame}
+\title{make a uniform, random, or user-specified  grid over some columns of a data.frame, and combine it with a grid of points to integrate over.}
 \usage{
 makeDesign(data, vars, n, uniform = TRUE, points)
 }
 \arguments{
-\item{data}{a \code{data.frame}}
+\item{data}{a \code{data.frame} which must contain \code{vars} as well as at least one other column}
 
 \item{vars}{character vector the columns in data to create the grid for}
 
-\item{n}{two dimensional integer vector giving the resolution of the grid. the first element gives the grid on \code{vars} and the second on the other columns, which are subsampled.}
+\item{n}{two dimensional integer vector giving the resolution of the grid. the first element gives the grid on \code{vars} and the second on the other columns, which are sampled without replacement.}
 
-\item{uniform}{logical, indicates whether a uniform or random grid is to be constructed.}
+\item{uniform}{logical, indicates whether a uniform grid is to be constructed.}
 
 \item{points}{a named list which gives specific points for \code{vars}.}
 }
@@ -21,7 +21,7 @@ makeDesign(data, vars, n, uniform = TRUE, points)
 a \code{data.frame} with at most \code{n} dimensions.
 }
 \description{
-makes a uniform or random grid over some columns of a data.frame and takes their cartesian product with the other columns
+makes a uniform, random, or user-specified grid over some columns of a data.frame and takes their Cartesian product with the other columns
 }
 \examples{
 data = data.frame(w = seq(0, 1, length.out = 5),

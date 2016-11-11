@@ -10,27 +10,27 @@ permutationImportance(data, vars, y, model, nperm = 100L,
   x - y)
 }
 \arguments{
-\item{data}{a data.frame including the target variable}
+\item{data}{a \code{data.frame} including both \code{y} and \code{vars}.}
 
-\item{vars}{a character vector specifying columns of \code{data} to permute}
+\item{vars}{a character vector specifying columns of \code{data} to permute.}
 
-\item{y}{a character vector giving the name of the target/outcome variable}
+\item{y}{a character vector giving the name of the target/outcome variable.}
 
 \item{model}{an object with a predict method which returns a vector or matrix. presumably this object represents a model fit.}
 
-\item{nperm}{positive integer giving the number of times to permute the indicated variables (default 100)}
+\item{nperm}{positive integer giving the number of times to permute the indicated variables (default is 100).}
 
-\item{predict.fun}{what function to generate predictions using \code{model}. default is the predict method for \code{model}.}
+\item{predict.fun}{what function to generate predictions using \code{model}. default is the predict method for \code{model}. the function must take two arguments, \code{object} and \code{newdata} and should return a vector or matrix.}
 
-\item{loss.fun}{what loss function to use to measure prediction errors. default is MSE for ordered predictions and mean misclassification error for unordered prediction errors.}
+\item{loss.fun}{what loss function to use to measure prediction errors. default is mean squared-error for ordered predictions and mean misclassification error for unordered prediction errors. this function must take two arguments, \dQuote{x} and \dQuote{y}, which operate on the output of \code{predict.fun} and \code{data[, y]}.}
 
-\item{contrast.fun}{what function to use to contrast the permuted and unpermuted predictions. default is the difference.}
+\item{contrast.fun}{what function to use to contrast the permuted and unpermuted predictions. default is the difference. this function takes two arguments \dQuote{x} and \dQuote{y}, which are the output of the \code{loss.fun}.}
 }
 \value{
-a numeric vector of length one giving the change in prediction error from \code{nperm} permutations of \code{vars}.
+a numeric vector or matrix, depending on \code{contrast.fun} and \code{loss.fun}, giving the change in prediction error from \code{nperm} permutations of \code{vars}.
 }
 \description{
-computes the change in prediction error from permuting variables
+computes the change in prediction error from permuting variables.
 }
 \examples{
 X = replicate(3, rnorm(100))

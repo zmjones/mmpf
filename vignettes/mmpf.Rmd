@@ -25,7 +25,7 @@ library(randomForest)
 
 data(swiss)
 
-fit <- randomForest(Fertility ~ ., swiss)
+fit = randomForest(Fertility ~ ., swiss)
 marginalPrediction(swiss[, -1], "Education", c(10, 25), fit)
 ```
 
@@ -44,7 +44,7 @@ By passing the identity function to `aggregate.fun`, which simply returns its in
 ```{r}
 data(iris)
 
-fit <- randomForest(Species ~ ., iris)
+fit = randomForest(Species ~ ., iris)
 marginalPrediction(iris[, -ncol(iris)], "Sepal.Width", c(10, 25), fit,
   predict.fun = function(object, newdata) predict(object, newdata = newdata, type = "prob"))
 ```
@@ -72,9 +72,9 @@ It is, for example, possible to compute the expected change in the mean misclass
 ```{r}
 permutationImportance(iris, "Sepal.Width", "Species", fit,
   loss.fun = function(x, y) {
-    mat <- table(x, y)
-    n <- colSums(mat)
-    diag(mat) <- 0
+    mat = table(x, y)
+    n = colSums(mat)
+    diag(mat) = 0
     rowSums(mat) / n
   },
   contrast.fun = function(x, y) x - y)
