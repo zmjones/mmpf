@@ -94,10 +94,8 @@ uniformGrid.matrix = function(x, length.out) {
 #' 
 #' @export
 cartesianExpand = function(x, y) {
-  assertDataFrame(x, any.missing = FALSE, min.rows = 1L, min.cols = 1L,
-    col.names = "named")
-  assertDataFrame(y, any.missing = FALSE, min.rows = 1L, min.cols = 1L,
-    col.names = "named")
+  assertDataFrame(x, min.rows = 1L, min.cols = 1L, col.names = "named")
+  assertDataFrame(y, min.rows = 1L, min.cols = 1L, col.names = "named")
   
   A = as.data.frame(array(dim = c(dim(x)[1] * dim(y)[1], dim(x)[2] + dim(y)[2])))
   idx = rep(1:dim(x)[1], dim(y)[1])
