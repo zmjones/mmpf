@@ -1,12 +1,13 @@
 Package: mmpf
-Title: Monte-Carlo Marginalization of Prediction Functions
-Description: Marginalizes prediction functions using Monte-Carlo integration.
+Title: Monte-Carlo Methods for Prediction Functions
+Description: Marginalizes prediction functions using Monte-Carlo integration and computes permutation importance.
 Version: 0.0.1
 Authors@R: person("Zachary", "Jones", email = "zmj@zmjones.com", role = c("aut", "cre"))
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
+Imports: checkmate
 Suggests: testthat,
     rmarkdown,
     knitr,

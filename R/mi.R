@@ -1,6 +1,8 @@
 #' @title computes permutation importance
 #' @description computes the change in prediction error from permuting variables
 #'
+#' @importFrom checkmate assertIntegerish assertDataFrame assertLogical assertList assertSubset assertFunction assertCharacter
+#'
 #' @param data a data.frame including the target variable
 #' @param vars a character vector specifying columns of \code{data} to permute
 #' @param y a character vector giving the name of the target/outcome variable
@@ -13,30 +15,43 @@
 #' @return a numeric vector of length one giving the change in prediction error from \code{nperm} permutations of \code{vars}.
 #'
 #' @examples
-#' X <- replicate(3, rnorm(100))
-#' y <- X %*% runif(3)
-#' data <- data.frame(X, y)
-#' fit <- lm(y ~ -1 + X1 + X2 + X3, data)
+#' X = replicate(3, rnorm(100))
+#' y = X %*% runif(3)
+#' data = data.frame(X, y)
+#' fit = lm(y ~ -1 + X1 + X2 + X3, data)
 #'
 #' permutationImportance(data, "X1", "y", fit)
 #' @export
-permutationImportance <- function(data, vars, y, model,
+permutationImportance = function(data, vars, y, model,
   nperm = 100L,
   predict.fun = function(object, newdata) predict(object, newdata = newdata),
   loss.fun = function(x, y) defaultLoss(x, y),
-  contrast.fun = function(x, y) mean(x - y)) {
+  contrast.fun = function(x, y) x - y) {
+
+  assertCharacter(vars, min.len = 1L, max.len = ncol(data) - 1L)
+  assertCharacter(y, len = 1L)
+  assertDataFrame(data, min.rows = 1L, min.cols = length(vars) + 1L)
+  assertSubset(c(vars, y), colnames(data), FALSE)
+  assertCount(nperm, positive = TRUE)
+  assertFunction(predict.fun, args = c("object", "newdata"), nargs = 2L)
+  assertFunction(loss.fun, args = c("x", "y"), ordered = TRUE)
+  assertFunction(contrast.fun, args = c("x", "y"), ordered = TRUE)
   
-  design <- makePermutedDesign(data, vars, nperm)
-  unpermuted <- loss.fun(predict.fun(model, data), data[, y])
-  permuted.predictions <- predict.fun(model, design)
-  permuted.predictions <- array(permuted.predictions, c(nrow(data), nperm))
-  permuted <- loss.fun(permuted.predictions, data[, y])
+  design = makePermutedDesign(data, vars, nperm)
+  unpermuted = loss.fun(predict.fun(model, data), data[, y])
+  permuted.predictions = predict.fun(model, design)
+  permuted = loss.fun(permuted.predictions, design[, y])
+  if (length(permuted) == nperm * nrow(data)) {
+    permuted <- array(permuted, c(nrow(data), nperm))
+  }
   contrast.fun(permuted, unpermuted)
 }
 
 #' @title creates a data.frame with some variables permuted
 #' @description takes an input data.frame, permutes some variables, and stacks the resulting data.frames
 #'
+#' @import checkmate
+#' 
 #' @param data a data.frame
 #' @param vars a character vector indicating columns in \code{data} to permute
 #' @param nperm an integer specifying the number of times to permute the columns indicated by \code{vars}
@@ -44,13 +59,18 @@ permutationImportance <- function(data, vars, y, model,
 #' @return a data.frame with number of rows equal to \code{nrow(data) * nperm}
 #'
 #' @examples
-#' data <- data.frame(x = 1:3, y = letters[1:3])
+#' data = data.frame(x = 1:3, y = letters[1:3])
 #' makePermutedDesign(data, "x", 3)
 #' @export
-makePermutedDesign <- function(data, vars, nperm) {
-  design <- data[rep(1:nrow(data), times = nperm), ]
-  idx <- lapply(1:nperm, function(x) sample(1:nrow(data)) + (x - 1) * nrow(data))
-  idx <- unlist(idx)
-  design[, vars] <- design[idx, vars]
+makePermutedDesign = function(data, vars, nperm) {
+  assertCharacter(vars, min.len = 1L, max.len = ncol(data) - 1L)
+  assertDataFrame(data, min.rows = 1L, min.cols = length(vars) + 1L)
+  assertSubset(vars, colnames(data), FALSE)
+  assertCount(nperm, positive = TRUE)
+  
+  design = data[rep(1:nrow(data), times = nperm), ]
+  idx = lapply(1:nperm, function(x) sample(1:nrow(data)) + (x - 1) * nrow(data))
+  idx = unlist(idx)
+  design[, vars] = design[idx, vars]
   design
 }

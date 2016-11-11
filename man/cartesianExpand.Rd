@@ -18,8 +18,8 @@ a \code{data.frame}
 takes the cartesian product of two data.frames
 }
 \examples{
-x <- data.frame("a" = 1:5, "b" = 6:10)
-y <- data.frame("z" = letters[1:5], "y" = letters[6:10])
+x = data.frame("a" = 1:5, "b" = 6:10)
+y = data.frame("z" = letters[1:5], "y" = letters[6:10])
 cartesianExpand(x, y)
 
 }

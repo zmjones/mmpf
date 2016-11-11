@@ -1,10 +1,10 @@
 ---
-title: "Monte-Carlo Marginalization of Prediction Functions"
+title: "Monte-Carlo Methods for Prediction Functions"
 author: "Zachary M. Jones"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Monte-Carlo Marginalization of Prediction Functions}
+  %\VignetteIndexEntry{Monte-Carlo Methods for Prediction Functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -54,4 +54,28 @@ In all of the aforementioned cases `vars` can include multiple variables. In thi
 ```{r}
 marginalPrediction(iris[, -ncol(iris)], c("Sepal.Width", "Sepal.Length"), c(5, 25), fit,
   predict.fun = function(object, newdata) predict(object, newdata = newdata, type = "prob"))
+```
+
+Permutation importance is a Monte-Carlo method which estimates the importance of variables in determining predictions by computing the change from repeatedly permuting the values of those variables, and comparing the prediction error using the permuted data to the error on the unpermuted training data.
+
+`permutationImportance` can compute this type of importance under arbitrary loss (with respect to the observed target) functions and contrast (between the loss with the unpermuted and permuted data).
+
+
+```{r}
+permutationImportance(iris, "Sepal.Width", "Species", fit)
+```
+
+For methods which generate predictions which are characters or unordered factors, the default loss function is the mean misclassification error. For all other types of predictions mean squared error is used.
+
+It is, for example, possible to compute the expected change in the mean misclassification rate by class. The two arguments to `loss.fun` are the permuted predictions and the target variable. In this case they are both vectors of factors.
+
+```{r}
+permutationImportance(iris, "Sepal.Width", "Species", fit,
+  loss.fun = function(x, y) {
+    mat <- table(x, y)
+    n <- colSums(mat)
+    diag(mat) <- 0
+    rowSums(mat) / n
+  },
+  contrast.fun = function(x, y) x - y)
 ```

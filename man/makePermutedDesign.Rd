@@ -20,7 +20,7 @@ a data.frame with number of rows equal to \code{nrow(data) * nperm}
 takes an input data.frame, permutes some variables, and stacks the resulting data.frames
 }
 \examples{
-data <- data.frame(x = 1:3, y = letters[1:3])
+data = data.frame(x = 1:3, y = letters[1:3])
 makePermutedDesign(data, "x", 3)
 }
 

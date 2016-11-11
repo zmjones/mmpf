@@ -7,7 +7,7 @@
 permutationImportance(data, vars, y, model, nperm = 100L,
   predict.fun = function(object, newdata) predict(object, newdata = newdata),
   loss.fun = function(x, y) defaultLoss(x, y), contrast.fun = function(x, y)
-  mean(x - y))
+  x - y)
 }
 \arguments{
 \item{data}{a data.frame including the target variable}
@@ -33,10 +33,10 @@ a numeric vector of length one giving the change in prediction error from \code{
 computes the change in prediction error from permuting variables
 }
 \examples{
-X <- replicate(3, rnorm(100))
-y <- X \%*\% runif(3)
-data <- data.frame(X, y)
-fit <- lm(y ~ -1 + X1 + X2 + X3, data)
+X = replicate(3, rnorm(100))
+y = X \%*\% runif(3)
+data = data.frame(X, y)
+fit = lm(y ~ -1 + X1 + X2 + X3, data)
 
 permutationImportance(data, "X1", "y", fit)
 }

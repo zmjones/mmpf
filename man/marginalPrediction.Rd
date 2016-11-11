@@ -4,7 +4,7 @@
 \alias{marginalPrediction}
 \title{marginalizes prediction functions}
 \usage{
-marginalPrediction(data, vars, n, model, uniform = TRUE,
+marginalPrediction(data, vars, n, model, uniform = TRUE, points,
   aggregate.fun = mean, predict.fun = function(object, newdata)
   predict(object, newdata = newdata))
 }
@@ -19,6 +19,8 @@ marginalPrediction(data, vars, n, model, uniform = TRUE,
 
 \item{uniform}{logical indicating whether to create the grid on \code{var} uniformly or to sample from the empirical distribution.}
 
+\item{points}{a named list which gives specific points for \code{vars}.}
+
 \item{aggregate.fun}{what function to aggregate the predictions with}
 
 \item{predict.fun}{what function to generate predictions using \code{model}. default is the predict method for \code{model}.}
@@ -30,10 +32,10 @@ a named list with an element "prediction" which contains an array, matrix, or ve
 monte-carlo integration of prediction functions
 }
 \examples{
-X <- replicate(3, rnorm(100))
-y <- X \%*\% runif(3)
-data <- data.frame(X, y)
-fit <- lm(y ~ -1 + X)
+X = replicate(3, rnorm(100))
+y = X \%*\% runif(3)
+data = data.frame(X, y)
+fit = lm(y ~ -1 + X)
 
 marginalPrediction(data.frame(X), "X2", c(10, 25), fit,
   aggregate.fun = function(x) c("mean" = mean(x), "variance" = var(x)))
