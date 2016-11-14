@@ -28,7 +28,8 @@ marginalPrediction = function(data, vars, n, model, uniform = TRUE, points,
  aggregate.fun = mean, predict.fun = function(object, newdata)
    predict(object, newdata = newdata)) {
 
-  assertIntegerish(n, lower = 1, upper = nrow(data), any.missing = FALSE, len = 2L)
+  assertIntegerish(n, lower = 1, any.missing = if (!missing(points)) TRUE else FALSE,
+    len = 2L)
   assertCharacter(vars, any.missing = FALSE, min.len = 1L, max.len = ncol(data),
     unique = TRUE)
   assertDataFrame(data, min.rows = n[2], min.cols = length(vars))
