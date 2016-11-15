@@ -37,7 +37,7 @@ marginalPrediction = function(data, vars, n, model, uniform = TRUE, points,
   assertFlag(uniform, FALSE)
   if (!missing(points)) {
     assertList(points, types = sapply(data[, vars, drop = FALSE], class),
-      any.missing = FALSE, len = length(vars), names = vars)
+      any.missing = FALSE, len = length(vars))
     checkSetEqual(names(points), vars)
   }
   assertFunction(aggregate.fun, args = "x", nargs = 1L)
