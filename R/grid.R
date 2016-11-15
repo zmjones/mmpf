@@ -118,6 +118,7 @@ cartesianExpand = function(x, y) {
 #' @param n two dimensional integer vector giving the resolution of the grid. the first element gives the grid on \code{vars} and the second on the other columns, which are sampled without replacement.
 #' @param uniform logical, indicates whether a uniform grid is to be constructed.
 #' @param points a named list which gives specific points for \code{vars}.
+#' @param int.points a integer vector giving indices of the points in \code{data} to marginalize over.
 #' @return a \code{data.frame} with at most \code{n} dimensions.
 #'
 #' @examples
@@ -130,20 +131,27 @@ cartesianExpand = function(x, y) {
 #' makeDesign(data, "z", c(10, 5), TRUE)
 #'
 #' @export
-makeDesign = function(data, vars, n, uniform = TRUE, points) {
+makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
   ## arg checks
-  assertIntegerish(n, lower = 1, any.missing = if (!missing(points)) TRUE else FALSE,
-    len = 2L)
-  assertCharacter(vars, any.missing = FALSE, min.len = 1L, max.len = ncol(data),
+  assertCharacter(vars, any.missing = FALSE, min.len = 1L, max.len = ncol(data) - 1L,
     unique = TRUE)
-  assertDataFrame(data, min.rows = n[2], min.cols = length(vars))
+  assertDataFrame(data, min.cols = length(vars) + 1L,
+    min.rows = if (!missing(int.points)) length(int.points) else n[2])
   assertSubset(vars, colnames(data), FALSE)
   assertFlag(uniform, FALSE)
-
+  
+  if (!missing(int.points)) {
+    assertIntegerish(int.points, any.missing = FALSE, min.len = 1L)
+  } else {
+    assertInt(n[2], lower = 1)
+  }
+  
   if (!missing(points)) {
     assertList(points, types = sapply(data[, vars, drop = FALSE], class),
       any.missing = FALSE, len = length(vars))
     checkSetEqual(names(points), vars)
+  } else {
+    assertInt(n[1], lower = 1)
   }
   
   if (missing(points)) {
@@ -173,9 +181,12 @@ makeDesign = function(data, vars, n, uniform = TRUE, points) {
   ## subsample training data, combine
   nvars = colnames(data)[!colnames(data) %in% vars]
 
+  if (missing(int.points)) {
+    int.points <- sample(seq_len(nrow(data)), min(n[2], nrow(data)))
+  }
+
   ## combine points with sampled points
   design = cartesianExpand(points,
-    data[sample(seq_len(nrow(data)), min(n[2], nrow(data))),
-      !colnames(data) %in% vars, drop = FALSE])
+    data[int.points, !colnames(data) %in% vars, drop = FALSE])
   design[, colnames(data)]
 }

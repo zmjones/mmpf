@@ -10,6 +10,7 @@
 #' @param n an integer vector of length two giving the resolution of the uniform or random grid on \code{vars} for the first element, and the number of the rows of the \code{data} to be sampled without replacement for the second element.
 #' @param uniform logical indicating whether to create the grid on \code{vars} uniformly or to sample without replacement from the empirical distribution of those \code{vars}.
 #' @param points a named list which gives specific points for \code{vars}. specifying this argument overrides \code{uniform}.
+#' @param int.points a integer vector giving indices of the points in \code{data} to marginalize over.
 #' @param aggregate.fun what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{mean}.
 #' @param predict.fun what function to generate predictions using \code{model}. default is the predict method for \code{model}. this function must have two arguments, \code{object} and \code{newdata}.
 #'
@@ -24,26 +25,14 @@
 #' marginalPrediction(data.frame(X), "X2", c(10, 25), fit,
 #'   aggregate.fun = function(x) c("mean" = mean(x), "variance" = var(x)))
 #' @export
-marginalPrediction = function(data, vars, n, model, uniform = TRUE, points,
+marginalPrediction = function(data, vars, n, model, uniform = TRUE, points, int.points,
  aggregate.fun = mean, predict.fun = function(object, newdata)
    predict(object, newdata = newdata)) {
 
-  assertIntegerish(n, lower = 1, any.missing = if (!missing(points)) TRUE else FALSE,
-    len = 2L)
-  assertCharacter(vars, any.missing = FALSE, min.len = 1L, max.len = ncol(data),
-    unique = TRUE)
-  assertDataFrame(data, min.rows = n[2], min.cols = length(vars))
-  assertSubset(vars, colnames(data), FALSE)
-  assertFlag(uniform, FALSE)
-  if (!missing(points)) {
-    assertList(points, types = sapply(data[, vars, drop = FALSE], class),
-      any.missing = FALSE, len = length(vars))
-    checkSetEqual(names(points), vars)
-  }
   assertFunction(aggregate.fun, args = "x", nargs = 1L)
   assertFunction(predict.fun, args = c("object", "newdata"), nargs = 2L)
 
-  design = makeDesign(data, vars, n, uniform, points)
+  design = makeDesign(data, vars, n, uniform, points, int.points)
   n[1] = nrow(unique(design[, vars, drop = FALSE]))
   preds = predict.fun(model, design)
     

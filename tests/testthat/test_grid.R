@@ -78,4 +78,8 @@ test_that("makeDesign works", {
   expect_that(length(unique(tmp[, "r"])), equals(5))
   expect_that(length(unique(tmp[, "z"])), equals(5))
   expect_that(all(!is.na(tmp)), is_true())
+
+  ## test int.points arg
+  tmp = makeDesign(data, "r", c(5, NA), int.points = 1:3)
+  expect_that(nrow(unique(tmp[, !colnames(data) == "r"])), equals(3))
 })

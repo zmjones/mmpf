@@ -4,7 +4,7 @@
 \alias{marginalPrediction}
 \title{marginalizes prediction functions}
 \usage{
-marginalPrediction(data, vars, n, model, uniform = TRUE, points,
+marginalPrediction(data, vars, n, model, uniform = TRUE, points, int.points,
   aggregate.fun = mean, predict.fun = function(object, newdata)
   predict(object, newdata = newdata))
 }
@@ -20,6 +20,8 @@ marginalPrediction(data, vars, n, model, uniform = TRUE, points,
 \item{uniform}{logical indicating whether to create the grid on \code{vars} uniformly or to sample without replacement from the empirical distribution of those \code{vars}.}
 
 \item{points}{a named list which gives specific points for \code{vars}. specifying this argument overrides \code{uniform}.}
+
+\item{int.points}{a integer vector giving indices of the points in \code{data} to marginalize over.}
 
 \item{aggregate.fun}{what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{mean}.}
 

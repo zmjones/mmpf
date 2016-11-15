@@ -4,7 +4,7 @@
 \alias{makeDesign}
 \title{make a uniform, random, or user-specified  grid over some columns of a data.frame, and combine it with a grid of points to integrate over.}
 \usage{
-makeDesign(data, vars, n, uniform = TRUE, points)
+makeDesign(data, vars, n, uniform = TRUE, points, int.points)
 }
 \arguments{
 \item{data}{a \code{data.frame} which must contain \code{vars} as well as at least one other column}
@@ -16,6 +16,8 @@ makeDesign(data, vars, n, uniform = TRUE, points)
 \item{uniform}{logical, indicates whether a uniform grid is to be constructed.}
 
 \item{points}{a named list which gives specific points for \code{vars}.}
+
+\item{int.points}{a integer vector giving indices of the points in \code{data} to marginalize over.}
 }
 \value{
 a \code{data.frame} with at most \code{n} dimensions.
