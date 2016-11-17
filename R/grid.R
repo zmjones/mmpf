@@ -96,15 +96,11 @@ uniformGrid.matrix = function(x, length.out) {
 cartesianExpand = function(x, y) {
   assertDataFrame(x, min.rows = 1L, min.cols = 1L, col.names = "named")
   assertDataFrame(y, min.rows = 1L, min.cols = 1L, col.names = "named")
-  
-  A = as.data.frame(array(dim = c(dim(x)[1] * dim(y)[1], dim(x)[2] + dim(y)[2])))
-  idx = rep(1:dim(x)[1], dim(y)[1])
-  A[, 1:dim(x)[2]] = x[idx,, drop = FALSE]
 
-  idy = rep(1:dim(y)[1], dim(x)[1])
-  for (j in 1:dim(y)[2]) {
-    A[, dim(x)[2] + j] = y[idy, j, drop = FALSE]
-  }
+  A = as.data.frame(array(dim = c(nrow(x) * nrow(y), ncol(x) + ncol(y))))
+  idx = rep(seq_len(nrow(x)), each = nrow(y))
+  A[, 1:ncol(x)] = x[idx,, drop = FALSE]
+  A[, (ncol(x) + 1):ncol(A)] = y
   colnames(A) = c(colnames(x), colnames(y))
   A
 }
@@ -178,15 +174,10 @@ makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
     points = expand.grid(points, stringsAsFactors = FALSE)
   }
 
-  ## subsample training data, combine
-  nvars = colnames(data)[!colnames(data) %in% vars]
-
   if (missing(int.points)) {
-    int.points <- sample(seq_len(nrow(data)), min(n[2], nrow(data)))
+    int.points = sample(seq_len(nrow(data)), min(n[2], nrow(data)))
   }
 
   ## combine points with sampled points
-  design = cartesianExpand(points,
-    data[int.points, !colnames(data) %in% vars, drop = FALSE])
-  design[, colnames(data)]
+  cartesianExpand(data[int.points, !colnames(data) %in% vars, drop = FALSE], points)
 }
