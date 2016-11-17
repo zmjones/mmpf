@@ -12,7 +12,6 @@ vignette: >
 ```{r echo=FALSE}
 knitr::opts_chunk$set(error = TRUE)
 ```
-
 This packages allows you to to marginalize arbitrary prediction functions using Monte-Carlo integration. Since many prediction functions cannot be easily decomposed into a sum of low dimensional components marginalization can be helpful in making these functions interpretable.
 
 `marginalPrediction` does this computation and then evaluates the marginalized function at a set grid points, which can be uniformly created, subsampled from the training data, or explicitly specified via the `points` argument.
@@ -21,14 +20,19 @@ The create of a uniform grid is handled by the `uniformGrid` method. If `uniform
 
 The function is integrated against a sample of size `n[2]` taken without replacement from the `data`. The argument `int.points` can be used to override this (in which case you can specify `n[2] = NA`). `int.points` is a vector of integerish indices which specify rows of the `data` to use instead.
 
-```{r}
+```{r, fig.width = 7, fig.height = 5}
 library(mmpf)
 library(randomForest)
+library(ggplot2)
+library(reshape2)
 
 data(swiss)
 
 fit = randomForest(Fertility ~ ., swiss)
-marginalPrediction(swiss[, -1], "Education", c(10, 25), fit)
+mp = marginalPrediction(swiss[, -1], "Education", c(10, nrow(swiss)), fit)
+mp
+
+ggplot(data.frame(mp), aes(Education, prediction)) + geom_point() + geom_line()
 ```
 
 The output of `marginalPrediction` is always a list with two elements, `prediction` and `points`.
@@ -37,25 +41,45 @@ By default the Monte-Carlo expectation is computed, which is set by the `aggrega
 
 By passing the identity function to `aggregate.fun`, which simply returns its input exactly, the integration points are returned directly so that the `prediction` element of the return is a matrix of dimension `n`. `n`, although it is an argument, can be larger or smaller depending on the interaction between the input arguments `n` and `data`. For example if a uniform grid of size 10 is requested (via `n[1]`) from a factor with only 5 levels, a uniform grid of size 5 is created. If `vars` is a vector of length greater than 1, then `n[1]` becomes the size of the Cartesian product of the grids created for each element of `vars`, which can be at most `n[1]^length(vars)`.
 
-```{r}
-marginalPrediction(swiss[, -1], "Education", c(10, 25), fit, aggregate.fun = identity)
+```{r, fig.width = 7, fig.height = 5}
+mp = marginalPrediction(swiss[, -1], "Education", c(10, 5), fit, aggregate.fun = identity)
+mp
+
+ggplot(melt(data.frame(mp), id.vars = "Education"), aes(Education, value, group = variable)) + geom_point() + geom_line()
 ````
 
 `predict.fun` specifies a prediction function to apply to the `model` argument. This function must take two arguments, `object` (where `model` is inserted) and `newdata`, which is a `data.frame` to compute predictions on, which is generated internally and is controlled by the other arguments. This allows `marginalPrediction` to handle cases in which predictions for a single data point are vector-valued. That is, classification tasks where probabilities are output, and multivariate regression and/or classification. In these cases `aggregate.fun` is applied separately to each column of the prediction matrix. `aggregate.fun` must take one argument `x`, a vector output from `predict.fun` and return a vector of no greater dimension than that of `x`.
 
-```{r}
+```{r, fig.width = 7, fig.height = 5}
 data(iris)
 
 fit = randomForest(Species ~ ., iris)
-marginalPrediction(iris[, -ncol(iris)], "Sepal.Width", c(10, 25), fit,
+mp = marginalPrediction(iris[, -ncol(iris)], "Petal.Width", c(10, 25), fit,
   predict.fun = function(object, newdata) predict(object, newdata = newdata, type = "prob"))
+mp
+
+colnames(mp$prediction) = levels(iris$Species)
+names(mp)[1] = ""
+plt = melt(data.frame(mp), id.vars = "Petal.Width", variable.name = "class",
+  value.name = "prob")
+
+ggplot(plt, aes(Petal.Width, prob, color = class)) + geom_line() + geom_point()
 ```
 
 As mentioned before, `vars` can include multiple variables.
 
-```{r}
-marginalPrediction(iris[, -ncol(iris)], c("Sepal.Width", "Sepal.Length"), c(5, 25), fit,
+```{r, fig.width = 7, fig.height = 5}
+mp = marginalPrediction(iris[, -ncol(iris)], c("Petal.Width", "Petal.Length"), c(10, 25), fit,
   predict.fun = function(object, newdata) predict(object, newdata = newdata, type = "prob"))
+mp
+
+colnames(mp$prediction) = levels(iris$Species)
+names(mp) = NULL
+
+plt = melt(data.frame(mp), id.vars = c("Petal.Width", "Petal.Length"),
+  variable.name = "class", value.name = "prob")
+
+ggplot(plt, aes(Petal.Width, Petal.Length, fill = prob)) + geom_raster() + facet_wrap(~ class)
 ```
 
 Permutation importance is a Monte-Carlo method which estimates the importance of variables in determining predictions by computing the change in prediction error from repeatedly permuting the values of those variables.

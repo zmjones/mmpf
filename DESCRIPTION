@@ -12,6 +12,8 @@ Imports: checkmate
 Suggests: testthat,
     rmarkdown,
     knitr,
-    randomForest
+    randomForest,
+    ggplot2,
+    reshape2
 BugReports: https://github.com/zmjones/mmpf
 VignetteBuilder: knitr
