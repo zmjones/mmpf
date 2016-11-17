@@ -33,7 +33,7 @@ marginalPrediction = function(data, vars, n, model, uniform = TRUE, points, int.
   assertFunction(predict.fun, args = c("object", "newdata"), nargs = 2L)
 
   design = makeDesign(data, vars, n, uniform, points, int.points)
-  n[1] = nrow(unique(design[, vars, drop = FALSE]))
+  n[1] = nrow(unique(design[, vars, drop = FALSE])) ## improve
   preds = predict.fun(model, design)
     
   if (is.matrix(preds) | is.data.frame(preds)) {
@@ -50,6 +50,6 @@ marginalPrediction = function(data, vars, n, model, uniform = TRUE, points, int.
 
   list(
     "prediction" = mp,
-    "points" = unique(design[, vars, drop = FALSE])
+    "points" = unique(design[, vars, drop = FALSE]) ## improve
   )
 }

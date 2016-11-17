@@ -82,6 +82,7 @@ uniformGrid.matrix = function(x, length.out) {
 #' @description takes the cartesian product of two data.frames
 #'
 #' @import checkmate
+#' @import data.table
 #'
 #' @param x a \code{data.frame}
 #' @param y a \code{data.frame}
@@ -97,12 +98,11 @@ cartesianExpand = function(x, y) {
   assertDataFrame(x, min.rows = 1L, min.cols = 1L, col.names = "named")
   assertDataFrame(y, min.rows = 1L, min.cols = 1L, col.names = "named")
 
-  A = as.data.frame(array(dim = c(nrow(x) * nrow(y), ncol(x) + ncol(y))))
-  idx = rep(seq_len(nrow(x)), each = nrow(y))
-  A[, 1:ncol(x)] = x[idx,, drop = FALSE]
-  A[, (ncol(x) + 1):ncol(A)] = y
-  colnames(A) = c(colnames(x), colnames(y))
-  A
+  x$id = 1
+  y$id = 1
+  x = data.table(x, key = "id")
+  y = data.table(y, key = "id")
+  merge(x, y, all = TRUE, allow.cartesian = TRUE)[, !"id", with = FALSE]
 }
 #' @title make a uniform, random, or user-specified  grid over some columns of a data.frame, and combine it with a grid of points to integrate over.
 #' @description makes a uniform, random, or user-specified grid over some columns of a data.frame and takes their Cartesian product with the other columns
@@ -179,5 +179,7 @@ makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
   }
 
   ## combine points with sampled points
-  cartesianExpand(data[int.points, !colnames(data) %in% vars, drop = FALSE], points)
+  as.data.frame(
+    cartesianExpand(data[int.points, !colnames(data) %in% vars, drop = FALSE], points)
+  )
 }
