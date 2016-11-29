@@ -37,8 +37,10 @@ marginalPrediction = function(data, vars, n, model, uniform = TRUE, points, int.
   preds = predict.fun(model, design)
     
   if (is.matrix(preds) | is.data.frame(preds)) {
+    save = colnames(preds)
     preds = array(preds, c(n, ncol(preds)))
     mp = apply(preds, c(1, 3), aggregate.fun)
+    colnames(mp) = save
   } else {
     preds = array(preds, n)
     mp = apply(preds, 1, aggregate.fun)
