@@ -26,7 +26,7 @@
 #'   aggregate.fun = function(x) c("mean" = mean(x), "variance" = var(x)))
 #' @export
 marginalPrediction = function(data, vars, n, model, uniform = TRUE, points, int.points,
- aggregate.fun = mean, predict.fun = function(object, newdata)
+ aggregate.fun = function(x) sum(x) / length(x), predict.fun = function(object, newdata)
    predict(object, newdata = newdata)) {
 
   assertFunction(aggregate.fun, args = "x", nargs = 1L)
