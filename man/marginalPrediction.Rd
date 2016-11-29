@@ -5,8 +5,8 @@
 \title{marginalizes prediction functions}
 \usage{
 marginalPrediction(data, vars, n, model, uniform = TRUE, points, int.points,
-  aggregate.fun = mean, predict.fun = function(object, newdata)
-  predict(object, newdata = newdata))
+  aggregate.fun = function(x) sum(x)/length(x),
+  predict.fun = function(object, newdata) predict(object, newdata = newdata))
 }
 \arguments{
 \item{data}{a \code{data.frame} which contains the columns specified by \code{vars} and at least one additional column. should correspond to the set of columns used to train the \code{model}.}
@@ -23,7 +23,7 @@ marginalPrediction(data, vars, n, model, uniform = TRUE, points, int.points,
 
 \item{int.points}{a integer vector giving indices of the points in \code{data} to marginalize over.}
 
-\item{aggregate.fun}{what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{mean}.}
+\item{aggregate.fun}{what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{sum(x) / length(x)}.}
 
 \item{predict.fun}{what function to generate predictions using \code{model}. default is the predict method for \code{model}. this function must have two arguments, \code{object} and \code{newdata}.}
 }

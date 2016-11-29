@@ -11,7 +11,7 @@
 #' @param uniform logical indicating whether to create the grid on \code{vars} uniformly or to sample without replacement from the empirical distribution of those \code{vars}.
 #' @param points a named list which gives specific points for \code{vars}. specifying this argument overrides \code{uniform}.
 #' @param int.points a integer vector giving indices of the points in \code{data} to marginalize over.
-#' @param aggregate.fun what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{mean}.
+#' @param aggregate.fun what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{sum(x) / length(x)}.
 #' @param predict.fun what function to generate predictions using \code{model}. default is the predict method for \code{model}. this function must have two arguments, \code{object} and \code{newdata}.
 #'
 #' @return a named list with an element "prediction" which contains an array, matrix, or vector of dimension \code{n[1]}, the column dimension of the output of \code{predict.fun}, and the dimension of the output from \code{aggregate.fun}.
@@ -37,8 +37,10 @@ marginalPrediction = function(data, vars, n, model, uniform = TRUE, points, int.
   preds = predict.fun(model, design)
     
   if (is.matrix(preds) | is.data.frame(preds)) {
+    save = colnames(preds)
     preds = array(preds, c(n, ncol(preds)))
     mp = apply(preds, c(1, 3), aggregate.fun)
+    colnames(mp) = save
   } else {
     preds = array(preds, n)
     mp = apply(preds, 1, aggregate.fun)
