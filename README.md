@@ -1,5 +1,6 @@
 ![](https://travis-ci.org/zmjones/mmpf.svg)
 ![](http://www.r-pkg.org/badges/version/mmpf)
+![](http://cranlogs.r-pkg.org/badges/mmpf)
 
 **M**onte-Carlo **M**ethods for **P**rediction **F**unctions
 
