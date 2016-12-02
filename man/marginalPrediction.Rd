@@ -6,7 +6,8 @@
 \usage{
 marginalPrediction(data, vars, n, model, uniform = TRUE, points, int.points,
   aggregate.fun = function(x) sum(x)/length(x),
-  predict.fun = function(object, newdata) predict(object, newdata = newdata))
+  predict.fun = function(object, newdata) predict(object, newdata = newdata),
+  weight.fun = NULL)
 }
 \arguments{
 \item{data}{a \code{data.frame} which contains the columns specified by \code{vars} and at least one additional column. should correspond to the set of columns used to train the \code{model}.}
@@ -23,12 +24,14 @@ marginalPrediction(data, vars, n, model, uniform = TRUE, points, int.points,
 
 \item{int.points}{a integer vector giving indices of the points in \code{data} to marginalize over.}
 
-\item{aggregate.fun}{what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{sum(x) / length(x)}.}
+\item{aggregate.fun}{what function to aggregate the predictions with. this function takes a single argument \code{x} and returns a vector. the default is \code{sum(x) / length(x)}. If \code{weight.fun} is used, this function must also take a numeric parameter \code{w}.}
 
 \item{predict.fun}{what function to generate predictions using \code{model}. default is the predict method for \code{model}. this function must have two arguments, \code{object} and \code{newdata}.}
+
+\item{weight.fun}{a function to construct weights for \code{aggregate.fun}. this allows Monte-Carlo integration on a grid without assuming a uniform distribution for said grid. the function should take two arguments, \code{design} and \code{data}, both of which are \code{data.frame}s of the same column (but different row) dimension, and should return a numeric vector of the same length as the number of rows in \code{design}. If this argument is used \code{aggregate.fun} must also have an argument \code{w} which is the result of \code{weight.fun}.}
 }
 \value{
-a named list with an element "prediction" which contains an array, matrix, or vector of dimension \code{n[1]}, the column dimension of the output of \code{predict.fun}, and the dimension of the output from \code{aggregate.fun}.
+a \code{data.table} with columns for predictions and \code{vars}.
 }
 \description{
 monte-carlo integration of prediction functions

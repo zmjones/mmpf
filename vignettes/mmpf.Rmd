@@ -32,10 +32,10 @@ fit = randomForest(Fertility ~ ., swiss)
 mp = marginalPrediction(swiss[, -1], "Education", c(10, nrow(swiss)), fit)
 mp
 
-ggplot(data.frame(mp), aes(Education, prediction)) + geom_point() + geom_line()
+ggplot(data.frame(mp), aes(Education, preds)) + geom_point() + geom_line()
 ```
 
-The output of `marginalPrediction` is always a list with two elements, `prediction` and `points`.
+The output of `marginalPrediction` is a `data.table` which contains the marginalized predictions and the grid points of the `vars`.
 
 By default the Monte-Carlo expectation is computed, which is set by the `aggregate.fun` argument's default value, the `mean` function. Substituting, say, the median, would give a different output.
 
@@ -58,8 +58,6 @@ mp = marginalPrediction(iris[, -ncol(iris)], "Petal.Width", c(10, 25), fit,
   predict.fun = function(object, newdata) predict(object, newdata = newdata, type = "prob"))
 mp
 
-colnames(mp$prediction) = levels(iris$Species)
-names(mp)[1] = ""
 plt = melt(data.frame(mp), id.vars = "Petal.Width", variable.name = "class",
   value.name = "prob")
 
@@ -72,9 +70,6 @@ As mentioned before, `vars` can include multiple variables.
 mp = marginalPrediction(iris[, -ncol(iris)], c("Petal.Width", "Petal.Length"), c(10, 25), fit,
   predict.fun = function(object, newdata) predict(object, newdata = newdata, type = "prob"))
 mp
-
-colnames(mp$prediction) = levels(iris$Species)
-names(mp) = NULL
 
 plt = melt(data.frame(mp), id.vars = c("Petal.Width", "Petal.Length"),
   variable.name = "class", value.name = "prob")
