@@ -1,0 +1,29 @@
+\begin{thebibliography}{3}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bischl et~al.(2016)Bischl, Lang, Kotthoff, Schiffner, Richter,
+  Studerus, Casalicchio, and Jones]{JMLR:v17:15-066}
+B.~Bischl, M.~Lang, L.~Kotthoff, J.~Schiffner, J.~Richter, E.~Studerus,
+  G.~Casalicchio, and Z.~M. Jones.
+\newblock mlr: Machine learning in r.
+\newblock \emph{Journal of Machine Learning Research}, 17\penalty0
+  (170):\penalty0 1--5, 2016.
+\newblock URL \url{http://jmlr.org/papers/v17/15-066.html}.
+
+\bibitem[Friedman(2001)]{friedman2001greedy}
+J.~H. Friedman.
+\newblock Greedy function approximation: a gradient boosting machine.
+\newblock \emph{Annals of statistics}, pages 1189--1232, 2001.
+
+\bibitem[Jones and Linder(2016)]{jones2016}
+Z.~M. Jones and F.~J. Linder.
+\newblock edarf: Exploratory data analysis using random forests.
+\newblock \emph{The Journal of Open Source Software}, 1\penalty0 (6), oct 2016.
+\newblock \doi{10.21105/joss.00092}.
+\newblock URL \url{http://dx.doi.org/10.21105/joss.00092}.
+
+\end{thebibliography}
