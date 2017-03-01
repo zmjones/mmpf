@@ -143,7 +143,7 @@ makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
   }
   
   if (!missing(points)) {
-    assertList(points, types = sapply(data[, vars, drop = FALSE], class),
+    assertList(points, types = sapply(data[, vars, drop = FALSE], function(x) class(x)[1]),
       any.missing = FALSE, len = length(vars))
     checkSetEqual(names(points), vars)
   } else {
