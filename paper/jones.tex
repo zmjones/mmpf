@@ -1,43 +1,53 @@
 % !TeX root = RJwrapper.tex
-\title{Monte-Carlo Methods for Prediction Functions}
+\title{mmpf: Monte-Carlo Methods for Prediction Functions}
 \author{by Zachary M. Jones}
 
 \maketitle
 
 \abstract{
-An abstract of less than 150 words.
+Machine learning methods can often learn high-dimensional functions which generalize well but are not human interpretable. \code{mmpf} marginalizes prediction functions using Monte-Carlo methods, allowing users to investigate the behavior of these learned functions as on a lower dimensional subset of input features: partial dependence and variations thereof. This makes machine learning methods more useful in situations where accurate prediction is not the only goal, such as in the social sciences where linear models are commonly used because of their interpretability.
 }
 
 Many methods for estimating prediction functions produce estimated functions which are not directly human-interpretable because of their complexity: they may include high-dimensional interactions and/or complex nonlinearities. While a learning method's capacity to automatically learn interactions and nonlinearities is attractive when the goal is prediction, there are many cases where users want good predictions \textit{and} the ability to understand how predictions depend on the features. \code{mmpf} implements general methods for interpreting prediction functions using Monte-Carlo methods. These methods allow any function which generates predictions to be be interpreted. \code{mmpf} is currently used in other packages for machine learning like \code{edarf} and \code{mlr} \citep{jones2016,JMLR:v17:15-066}.
 
 \section{Marginalizing Prediction Functions}
 
-The core function of \code{mmpf}, \code{marginalPrediction}, allows marginalization of a prediction function so that it depends on a subset of the features. Say the matrix of features $\mathbf{X}$ is partitioned into two subsets, $\mathbf{X}_u$ and $\mathbf{X}_{-u}$, where the former is of primary interest. A prediction function $f$ which in the regression case maps $\mathbf{X} \rightarrow \mathbf{y}$, where $\mathbf{y}$ is a real-valued vector, can be estimated from $(\mathbf{X}, \mathbf{y})$ giving $\hat{f}$, which might not be additive or linear in the columns of $\mathbf{X}_u$, making $\hat{f}$ difficult to interpret directly. If we knew the joint distribution $\mathbb{P}(\mathbf{X}, \mathbf{y})$ and $f$ we could marginalze the joint distribution so that it only depends on $\mathbf{X}_u$, which would give us $f_u$, which only depends on a subset of the features $\mathbf{X}_u$.
+The core function of \code{mmpf}, \code{marginalPrediction}, allows marginalization of a prediction function so that it depends on a subset of the features. Say the matrix of features $\mathbf{X}$ is partitioned into two subsets, $\mathbf{X}_u$ and $\mathbf{X}_{-u}$, where the former is of primary interest. A prediction function $f$ which in the regression case maps $\mathbf{X} \rightarrow \mathbf{y}$, where $\mathbf{y}$ is a real-valued vector might not be additive or linear in the columns of $\mathbf{X}_u$, making $f$ difficult to interpret directly. To obtain the marginal relationship between $\mathbf{X}_u$ and $f$ we could marginalize the joint distribution so that we obtain a function $f_u$ which only depends on the relevant subset of the features.
 
-$$f_u (\mathbf{X}_u) = \int f(\mathbf{X}_u, \mathbf{X}_{-u}) \mathbb{P}(\mathbf{X}) d \mathbf{X_{-u}}$$
+$$f_u (\mathbf{X}_u) = \int f(\mathbf{X}_u, \mathbf{X}_{-u}) \mathbb{P}(\mathbf{X}_u | \mathbf{X}_{-u}) \mathbb{P}(\mathbf{X}_{-u}) d \mathbf{X_{-u}} \label{eq:joint}$$
 
-However, we instead have $\hat{f}$ and also generally don't know the joint distribution of $(\mathbf{X}, \mathbf{y})$. To approximate $f_u$ we utiltize $\hat{f}$ as a plug-in estimator for $f$, and we assume that $\mathbb{P}(\mathbf{X}, \mathbf{y}) = \mathbb{P}(\mathbf{X}_{u}, \mathbf{y}) \mathbb{P}(\mathbf{X}_{-u}, \mathbf{y})$, which allows us to compute
+This however, can distort the relationship between $\mathbf{X}_u$ and $f$ because of the inclusion of dependence between $\mathbf{X}_u$ and $\mathbf{X}_{-u}$ (specifically $\mathbf{X}_u | \mathbf{X}_{-u}$), which is unrelated to $f$. An alternative is to instead integrate against the marginal distribution of $\mathbf{X}_{-u}$ as in \ref{eq:marginal}, as suggested by \citep{friedman2001greedy}.
 
-$$\hat{f}_{u}(\mathb{X}_{u}) = \int \hat{f}(\mathbf{X}_{u}, \mathbf{X}_{-u}) \mathbb{P}(\mathbf{X}_{-u}) d \mathbf{X}_{-u}$$
+$$\tilde{f}_u (\mathbf{X}_u) = \int f(\mathbf{X}_u, \mathbf{X}_{-u}) \mathbb{P}(\mathbf{X}_{-u}) d \mathbf{X_{-u}}  \label{eq:marginal}$$
 
-which relies only on knowing the marginal distribution of $\mathbf{X}_{-u}$, which we can approximate using the empirical marginal distribution of $\mathbf{X}_{-u}$. 
+\begin{figure}[h!]
+  \includegraphics[width=\textwidth]{mvj.png}
+  \caption{The marginal relationship between $\mathbf{x}_1$ and $f$ as estimated by integrating against the marginal distribution of $\mathbf{x}_2$ (the blue line) or the joint distribution of $(\mathbf{x}_1, \mathbf{x}_2)$ (the red line). The true relationship is shown by the dashed line. In the left panel $f$ is an additive function of $\mathbf{x}_1$ and $\mathbf{x}_2$ and in the right panel $\mathbf{x}_1$ and $\mathbf{x}_2$ interact via multiplication to produce $f$. \label{fig:sim}}
+\end{figure}
 
-This has the advantage of recovering the shape or functional form of of $\hat{f}_u$ \textit{if} the joint probability of $\mathbf{X}$ can be factorized to be additive or multiplicative in $(\mathbf{X}_u, \mathbf{X}_{-u})$ \citep{friedman2001greedy}.
+To illustrate this point, suppose data are generated from an additive model, $f(\cdot) = \mathbf{\mathbf{x}_1} + \mathbf{\mathbf{x}_2}$ and $(\mathbf{x}_1, \mathbf{x}_2) \sim \text{MVN}(\mathbf{0}, \Sigma)$ where the diagonal entries of $\Sigma$ are $1$ and the off-diagonals are $.5$. That is, $(\mathbf{x}_1, \mathbf{x}_2)$ are correlated by construction. Now if we want to understand how $f$ depends on $\mathbf{x}_1$ we could integrate against the true joint distribution as in \ref{eq:joint}. However, this distorts the relationship between $\mathbf{x}_1$ and $f$ because the conditional probability of $\mathbf{x}_1$ given $\mathbf{x}_2$ is higher at values of $(\mathbf{x}_1, \mathbf{x}_2)$ which are more extreme (due to their correlation). Since $\mathbf{x}_2$ is related to $f$ this has the effect of distorting the relationship between $\mathbf{x}_1$ and $f$, and, in this case, makes the relationship appear more extreme than it is, as can be seen in the left panel of Figure \ref{fig:sim}. This distortion of the relationship between $\mathbf{x}_1$ and $f$ can be made more misleading if $\mathbf{x}_2$ interacts with $\mathbf{x}_1$ to produce $f$, or if $\mathbf{x}_2$ has a nonlinear relationship with $f$, as can be seen in the right panel of Figure \ref{fig:sim}.
 
-These assumptions imply the following Monte-Carlo integration procedure
+Integrating against the marginal distribution of $\mathbf{x}_1$ recovers the true additive effect (left panel) and the average marginal effect ($\mathbf{x}_1 + .5 \mathbf{x}_1 \bar{\mathbf{x}_2}$, in the right panel) respectively.
 
-$$\hat{f}_u (\mathbf{X}_u) = \sum_{i = 1}^N \hat{f} (\mathbf{X}_u, \mathbf{X}_{-u}^{(i)})$$
+\section{Using \code{mmpf}}
 
-Partial dependence is the result of this type of procedure; it is the expected value of the marginalized prediction function $\hat{f}_u$ evaluated at values of $\mathbf{X}_u$ \cite{friedman2001greedy}. \code{marginalPrediction} allows users to compute partial dependence and any other function of this marginalized function easily.
+In practical settings we do not know $\mathbb{P}(\mathbf{X})$ or $f$. We can use $\hat{f}$, estimated from $(\mathbf{X}, \mathbf{y})$ as a plug-in estimator for $f$ and can estimate $\mathbb{P}(\mathbf{X}_{-u})$ from the training data, allowing us to estimate the \emph{partial dependence} of $\mathbf{X}_u$ on $\hat{f}$ \cite{friedman2001greedy}.
+
+$$\hat{f}_u (\mathbf{X}_u) = \sum_{i = 1}^N \hat{f} (\mathbf{X}_u, \mathbf{X}_{-u}^{(i)}) \label{eq:pd}$$
+
+This the behavior of the prediction function at a vector or matrix of values for $\mathbf{X}_u$, averaged over the empirical marginal distribution of $\mathbf{X}_{-u}$.
+
+The core function of \code{mmpf}, \code{marginalPrediction}, allows users to compute partial dependence and many variations thereof easily. The key arguments of \code{marginalPrediction} are the prediction function (\code{predict.fun}), the training data (\code{data}), the names of the columns of the training data which are of interest (\code{vars}), the number of points to use in the grid for $\mathbf{X}_u$ and the number of points to sample from $\mathbf{X}_{-u}$ (\code{n}, an integer vector of length 2). Additional arguments control how the grid is constructed (e.g., uniform sampling, user chosen values, non-uniform sampling), allow the use of weights, and how aggregation is done (e.g., deviations from partial dependence). Below is an example using the Iris data \citep{anderson1936species}.
 
 \begin{example}
   library(mmpf)
   library(randomForest)
   
   data(iris)
-  fit = randomForest(Species ~ ., data = iris)
+  iris.features = iris[, -ncol(iris)] # exclude the species column
+  fit = randomForest(iris.features, iris$Species)
 
-  mp = marginalPrediction(data = iris[, -ncol(iris)],
+  mp = marginalPrediction(data = iris.features,
     vars = "Petal.Width",
     n = c(10, nrow(iris)), model = fit, uniform = TRUE,
     predict.fun = function(object, newdata) predict(object, newdata, type = "prob"))
@@ -55,14 +65,14 @@ Partial dependence is the result of this type of procedure; it is the expected v
   ## 10:   2.5000000 0.1619867  0.2047867 0.6332267
 \end{example}
 
-If the prediction function is marginalized so that it depends on a low dimensional subset of the features, for example one or two dimensions, then it can be easily visualized, as in Figure \ref{figure:mp}.
+In this case $\hat{f}$ returns a probability of membership in each class for each values of the variable ``Petal.Width'' which is computed based on the average prediction for each value of ``Petal.Width'' shown and all the observed values of the other variables in the training data. As can be readily observed, partial dependence can be easily visualized, as in Figure \ref{figure:mp}.
 
 \begin{figure}
   \includegraphics[width=\textwidth]{mp.png}
   \caption{The expected value of $\hat{f}$ estimated by a random forest and marginalized by Monte-Carlo integration to depend only on ``Petal.Width.'' \label{figure:mp}}
 \end{figure}
 
-As mentioned earlier, \textit{any} function of the marginalized function can be computed, including vector-valued functions. For example the expectation and variance of the marginalized function can be simultaneously computed, the results of which are shown in Figures \ref{figure:mp_int_mean} and \ref{figure:mp_int_var}. Computing the variance of a marginalized function can be used for detecting interactions between $\mathbf{X}_u$ and $\mathbf{X}_{-u}$ \citep{goldstein2015peeking}.
+In fact, \textit{any} function of the marginalized function $\hat{f}_u$ can be computed, including vector-valued functions. For example the expectation and variance of $\hat{f}_u$ can be simultaneously computed, the results of which are shown in Figures \ref{figure:mp_int_mean} and \ref{figure:mp_int_var}. Computing the variance of $\hat{f}_u$ can be used for detecting interactions between $\mathbf{X}_u$ and $\mathbf{X}_{-u}$ \citep{goldstein2015peeking}. If the variance of $\hat{f}_u(\mathbf{X}_u)$ is constant then this indicates that $\mathbf{X}_{-u}$ does not interact with $\mathbf{X}_u$, since, if it did, this would make $\hat{f}$ more variable in regions of the joint distribution wherein there is interaction between $\mathbf{X}_u$ and $\mathbf{X}_{-u}$.
 
 \begin{example}
 mp.int = marginalPrediction(data = iris.features,
@@ -70,6 +80,22 @@ mp.int = marginalPrediction(data = iris.features,
   n = c(10, nrow(iris)), model = fit, uniform = TRUE,
   predict.fun = function(object, newdata) predict(object, newdata, type = "prob"),
   aggregate.fun = function(x) list("mean" = mean(x), "variance" = var(x)))
+
+head(mp.int)
+##    Petal.Width Petal.Length setosa.mean setosa.variance versicolor.mean
+## 1:         0.1     1.000000   0.9549867    0.0011619193      0.04448000
+## 2:         0.1     1.655556   0.9549867    0.0011619193      0.04448000
+## 3:         0.1     2.311111   0.9530933    0.0011317899      0.04637333
+## 4:         0.1     2.966667   0.4574667    0.0003524653      0.52818667
+## 5:         0.1     3.622222   0.4550400    0.0002619447      0.53061333
+## 6:         0.1     4.277778   0.4550400    0.0002619447      0.52472000
+##    versicolor.variance virginica.mean virginica.variance
+## 1:         0.001141889   0.0005333333      0.00000239821
+## 2:         0.001141889   0.0005333333      0.00000239821
+## 3:         0.001112236   0.0005333333      0.00000239821
+## 4:         0.001154918   0.0143466667      0.00054076492
+## 5:         0.001016158   0.0143466667      0.00054076492
+## 6:         0.001556364   0.0202400000      0.00093196886  
 \end{example}
 
 \begin{figure}
@@ -82,32 +108,10 @@ mp.int = marginalPrediction(data = iris.features,
   \caption{The variance of $\hat{f}$ estimated by a random forest and marginalized by Monte-Carlo integration to depend only on ``Petal.Width'' and ``Petal.Length.'' Non-constant variance indicates interaction between these variables and those marginalized out of $\hat{f}$. \label{figure:mp_int_var}}
 \end{figure}
 
-\code{marginalPrediction} can also perform Monte-Carlo integration against probability measures which are functions of the training data. This can help avoid problems from the assumption that the joint distribution of $\mathbf{X}$ is a product distribution. When $\mathbb{P}(\mathbf{X}) \neq \mathbb{P}(\mathbf{X}_u)\mathbb{P}(\mathbf{X}_{-u})$ assuming that this is the case can result in evaluating in a $\hat{f}_u$ which is constructed from model behavior in regions of the of the feature space which occur with low probability under $\mathbb{P}(\mathbf{X})$, making $\hat{f}_u$ depend heavily on the behavior of the method used to learn $\hat{f}$ in regions of little or no data \citep{hooker2012generalized}.
+\clearpage
+\newpage
 
-As a simple example consider the case of data from a deterministic function which is linear across its support. Specifically, $\mathbf{y} = f(\mathbf{X}) = \mathbf{X} \mathbf{w}$ where $\mathbf{X}$ is a two dimensional matrix of features each of which is drawn from an independent uniform distribution on ${0, 1}$ and $\mathbf{w}$ is a vector of real-valued weights.
-
-Suppose that there is an outlier which is extreme in both $X_1$ and $y$, but perfectly normal in $X_2$: $X_1 = 1.5$, $X_2 = .5$, and, $y = X_1^2 + X_2$. Figure \ref{figure:mp_w_data} shows the empirical distribution of $\mathbf{X}$. Some methods for constructing $\hat{f}$ will strongly depend on this outlying point, as is the case in this example. Using support vector regression and a polynomial kernel results in dramatic nonlinearity when $X_1 > 1$. If we compute unweighted partial dependence assume a discrete uniform distribution on $X_1$, which includes the outlying point at $X_1 = 1.5$.
-
-Although this outlier is easy to see, because this problem is low-dimensional, in a higher dimensional space outliers are difficult to detect visually. In these cases Monte-Carlo methods for interpreting $\hat{f}$ will also depend heavily on these sorts of points. Constructing a weight function, which takes points of the same dimension as $\mathbf{X}$ and outputs a scalar which encodes some notion of ``closeness'' to the training data can help alleviate this problem, as shown in Figure \ref{figure:mp_w}. 
-
-
-\begin{figure}
-  \includegraphics[width=\textwidth]{mp_w_data.png}
-  \caption{The joint distribution of the features, both of which are independent uniform draws, with the except of one point at $X_1 = 1.5, X_2 = .5$, which lies outside the support and is an outlier.\label{figure:mp_w_data}}
-\end{figure}
-
-\begin{figure}
-  \includegraphics[width=\textwidth]{mp_w.png}
-  \caption{$\hat{f}$ marginalized to depend only on $\mathbf{X}_1$ without weighting, shown in red, or with weighting based on Tukey's half-space depth, shown in blue. The true marginal relationship is shown in black and the dashed line shows the true bounds of the support of $X_1$. \label{figure:mp_w}}
-\end{figure}
-
-With observed outlying points model behavior can be controlled by choosing a loss function which does not heavily weight outlying points. However, this is not always possible or desirable. Outliers can also be generated by the aforementioned product distribution assumption. This can be especially problematic when features are highly correlated, making their joint distribution far from uniform.
-
-
-
-
-
-\bibliography{RJreferences}
+\bibliography{jones}
 
 \address{Zachary M. Jones\\
   Pennsylvania State University\\
