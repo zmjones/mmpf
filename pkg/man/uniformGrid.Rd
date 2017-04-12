@@ -31,4 +31,3 @@ data = data.frame(
 
 lapply(data, uniformGrid, length.out = 5)
 }
-

@@ -45,4 +45,3 @@ fit = lm(y ~ ., data)
 marginalPrediction(data.frame(X), "X2", c(10, 25), fit,
   aggregate.fun = function(x) c("mean" = mean(x), "variance" = var(x)))
 }
-
