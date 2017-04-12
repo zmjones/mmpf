@@ -127,7 +127,7 @@ cartesianExpand = function(x, y) {
 #' makeDesign(data, "z", c(10, 5), TRUE)
 #'
 #' @export
-makeDesign = function(data, vars, n, uniform = TRUE, points, int.points, ...) {
+makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
   ## arg checks
   assertCharacter(vars, any.missing = FALSE, min.len = 1L, max.len = ncol(data), unique = TRUE)
   assertDataFrame(data, min.cols = length(vars),
