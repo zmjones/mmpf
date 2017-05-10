@@ -166,7 +166,7 @@ makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
     } else {
       ## randomly sample points w/o replacement
       id = sample(1:nrow(data), n[1])
-      points = data[id, vars]
+      points = unique(data[id, vars, drop = FALSE])
     }
   } else {
     uniform = FALSE
