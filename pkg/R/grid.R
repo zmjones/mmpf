@@ -129,9 +129,8 @@ cartesianExpand = function(x, y) {
 #' @export
 makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
   ## arg checks
-  assertCharacter(vars, any.missing = FALSE, min.len = 1L, max.len = ncol(data) - 1L,
-    unique = TRUE)
-  assertDataFrame(data, min.cols = length(vars) + 1L,
+  assertCharacter(vars, any.missing = FALSE, min.len = 1L, max.len = ncol(data), unique = TRUE)
+  assertDataFrame(data, min.cols = length(vars),
     min.rows = if (!missing(int.points)) length(int.points) else n[2])
   assertSubset(vars, colnames(data), FALSE)
   assertFlag(uniform, FALSE)
@@ -179,7 +178,11 @@ makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
   }
 
   ## combine points with sampled points
-  as.data.frame(
-    cartesianExpand(data[int.points, !colnames(data) %in% vars, drop = FALSE], points)
-  )
+  if (!all(colnames(data) %in% vars))
+    setDF(cartesianExpand(
+      data[int.points, !colnames(data) %in% vars, drop = FALSE],
+      points
+    ))
+  else
+    points
 }

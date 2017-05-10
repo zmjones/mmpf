@@ -35,4 +35,3 @@ data = data.frame(w = seq(0, 1, length.out = 5),
 makeDesign(data, "z", c(10, 5), TRUE)
 
 }
-

@@ -23,4 +23,3 @@ takes an input data.frame, permutes some variables, and stacks the resulting \co
 data = data.frame(x = 1:3, y = letters[1:3])
 makePermutedDesign(data, "x", 3)
 }
-

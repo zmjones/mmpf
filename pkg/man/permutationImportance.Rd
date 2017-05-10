@@ -40,4 +40,3 @@ fit = lm(y ~ -1 + X1 + X2 + X3, data)
 
 permutationImportance(data, "X1", "y", fit)
 }
-

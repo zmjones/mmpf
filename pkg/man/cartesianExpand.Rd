@@ -23,4 +23,3 @@ y = data.frame("z" = letters[1:5], "y" = letters[6:10])
 cartesianExpand(x, y)
 
 }
-
