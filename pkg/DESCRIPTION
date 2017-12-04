@@ -1,7 +1,7 @@
 Package: mmpf
 Title: Monte-Carlo Methods for Prediction Functions
 Description: Marginalizes prediction functions using Monte-Carlo integration and computes permutation importance.
-Version: 0.0.3
+Version: 0.0.4
 Date: 2017-03-04
 Authors@R: person("Zachary", "Jones", email = "zmj@zmjones.com", role = c("aut", "cre"))
 License: MIT + file LICENSE
