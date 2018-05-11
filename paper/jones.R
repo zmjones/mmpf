@@ -42,14 +42,16 @@ ggplot(mp.int[fun == "variance"], aes(Petal.Width, Petal.Length)) +
 ggsave("mp_int_var.png", width = 8, height = 4)
 
 ## marginalization example
-mp = function(n, sigma, f) {
+mp = function(n, sigma, f, ...) {
   aggregate.fun = function(x, w) {
     mu = weighted.mean(x, w)
     sigma = (sum(w * x^2) * sum(w) - sum(w * x)^2) / (sum(w)^2 - sum(w^2))
     list(
       "mean" = mu,
       "lower" = mu + qnorm(.025) * sigma,
-      "upper" = mu + qnorm(.975) * sigma)
+      "upper" = mu + qnorm(.975) * sigma,
+      "sigma" = sigma
+      )
   }
 
   points = list("X1" = seq(-4, 4, length.out = 100))
@@ -58,7 +60,7 @@ mp = function(n, sigma, f) {
   p.marginal = function(design, data, sigma) dnorm(design$X2)
 
   X = rmvnorm(n, sigma = sigma)
-  data = data.frame(y = f(NULL, X), X)
+  data = data.frame(y = f(NULL, data.frame(X)), X)
   list(
     "joint" = marginalPrediction(data[, c("X1", "X2")], "X1", c(25, n), NULL,
       points = points, weight.fun = p.joint, predict.fun = f,
@@ -72,19 +74,24 @@ mp = function(n, sigma, f) {
 n = 10000
 sigma.diagonal = diag(2)
 sigma.dependent = matrix(c(1, .5, .5, 1), 2, 2)
+sigma.het = matrix(c(1, .9, .9, 1), 2, 2)
 
 X = data.frame(rmvnorm(500, sigma = sigma.dependent))
 ggplot(X, aes(X1, X2)) + 
   geom_point()
 ggsave("joint.png", width = 7, height = 6)
 
-f.additive = function(object, newdata) as.numeric(as.matrix(newdata) %*% c(1, 1))
-f.interaction = function(object, newdata)
-  as.numeric(as.matrix(data.frame(newdata, newdata[, 1] * newdata[, 2])) %*% c(1, 1, .5))
+f.additive = function(object, newdata, theta = c(1, 1))
+  newdata$X1 * theta[1] + newdata$X2 * theta[2]
+f.interaction = function(object, newdata, theta = c(1, 1, .5))
+  f.additive(object, newdata, theta[1:2]) + newdata$X1 * newdata$X2 * theta[3]
+## f.breakit = function(object, newdata)
+##   f.interaction(object, newdata, c(1, 15, 10))
 
 plt = list(
   "additive" = mp(n, sigma.dependent, f.additive),
-  "interaction" = mp(n, sigma.dependent, f.interaction)
+  "interaction" = mp(n, sigma.dependent, f.interaction)## ,
+  ## "broken" = mp(n, sigma.het, f.breakit)
 )
 
 plt = rbindlist(lapply(plt, rbindlist, idcol = "estimation"), idcol = "sim.type")
@@ -95,3 +102,8 @@ ggplot(plt, aes(X1, preds.mean, color = estimation)) +
   labs(y = expression(f(X[1])), x = expression(X[1])) +
   geom_line(aes(X1, X1), linetype = "dashed", color = "black")
 ggsave("mvj.png", width = 8, height = 4)
+
+ggplot(plt[estimation == "marginal", ], aes(X1, preds.sigma)) + geom_line() +
+  facet_wrap(~ sim.type) +
+  labs(y = expression(var(f(X[1]))), x = expression(X[1]))
+ggsave("mvv.png", width = 8, height = 4)
