@@ -5,9 +5,9 @@
 \title{computes permutation importance}
 \usage{
 permutationImportance(data, vars, y, model, nperm = 100L,
-  predict.fun = function(object, newdata) predict(object, newdata = newdata),
-  loss.fun = function(x, y) defaultLoss(x, y), contrast.fun = function(x, y)
-  x - y)
+  predict.fun = function(object, newdata) predict(object, newdata =
+  newdata), loss.fun = function(x, y) defaultLoss(x, y),
+  contrast.fun = function(x, y) x - y)
 }
 \arguments{
 \item{data}{a \code{data.frame} including both \code{y} and \code{vars}.}

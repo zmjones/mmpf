@@ -178,11 +178,15 @@ makeDesign = function(data, vars, n, uniform = TRUE, points, int.points) {
   }
 
   ## combine points with sampled points
-  if (!all(colnames(data) %in% vars))
-    setDF(cartesianExpand(
+  if (!all(colnames(data) %in% vars)) {
+    out = cartesianExpand(
       data[int.points, !colnames(data) %in% vars, drop = FALSE],
       points
-    ))
+    )
+    setcolorder(out, names(data))
+    setDF(out)
+    out
+  }
   else
     points
 }

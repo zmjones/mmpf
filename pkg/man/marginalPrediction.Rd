@@ -4,10 +4,10 @@
 \alias{marginalPrediction}
 \title{marginalizes prediction functions}
 \usage{
-marginalPrediction(data, vars, n, model, uniform = TRUE, points, int.points,
-  aggregate.fun = function(x) sum(x)/length(x),
-  predict.fun = function(object, newdata) predict(object, newdata = newdata),
-  weight.fun = NULL)
+marginalPrediction(data, vars, n, model, uniform = TRUE, points,
+  int.points, aggregate.fun = function(x) sum(x)/length(x),
+  predict.fun = function(object, newdata) predict(object, newdata =
+  newdata), weight.fun = NULL)
 }
 \arguments{
 \item{data}{a \code{data.frame} which contains the columns specified by \code{vars} and at least one additional column. should correspond to the set of columns used to train the \code{model}.}
