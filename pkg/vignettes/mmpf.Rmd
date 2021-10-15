@@ -46,7 +46,7 @@ mp = marginalPrediction(swiss[, -1], "Education", c(10, 5), fit, aggregate.fun =
 mp
 
 ggplot(melt(data.frame(mp), id.vars = "Education"), aes(Education, value, group = variable)) + geom_point() + geom_line()
-````
+```
 
 `predict.fun` specifies a prediction function to apply to the `model` argument. This function must take two arguments, `object` (where `model` is inserted) and `newdata`, which is a `data.frame` to compute predictions on, which is generated internally and is controlled by the other arguments. This allows `marginalPrediction` to handle cases in which predictions for a single data point are vector-valued. That is, classification tasks where probabilities are output, and multivariate regression and/or classification. In these cases `aggregate.fun` is applied separately to each column of the prediction matrix. `aggregate.fun` must take one argument `x`, a vector output from `predict.fun` and return a vector of no greater dimension than that of `x`.
 
